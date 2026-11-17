@@ -1,0 +1,15 @@
+{
+  "name": "enhance-qa",
+  "displayName": "enhance-qa",
+  "version": "0.1.0",
+  "description": "A QA department for any software: a scout maps the product and writes a checklist, testers use it like people do, a verifier reproduces every bug and verifies every fix, and a separate fixer fixes bugs one commit at a time. Adds read-only role agents and safety hooks to the enhance-qa skill.",
+  "author": { "name": "enhance-qa contributors" },
+  "license": "MIT",
+  "keywords": ["qa", "testing", "bug-bash", "release", "verification", "checklist", "vibe-coding"],
+  "agents": [
+    "./skills/enhance-qa/roles/claude/enhance-qa-scout.md",
+    "./skills/enhance-qa/roles/claude/enhance-qa-tester.md",
+    "./skills/enhance-qa/roles/claude/enhance-qa-verifier.md",
+    "./skills/enhance-qa/roles/claude/enhance-qa-fixer.md"
+  ]
+}

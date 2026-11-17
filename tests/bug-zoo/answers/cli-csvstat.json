@@ -1,0 +1,12 @@
+{
+  "app": "cli-csvstat",
+  "planted": [
+    {"id": "mean-off-by-one", "severity": "S1", "area": "stats", "title": "The mean is wrong (divides by count + 1)", "match": ["mean", "average", "15", "20"], "need": 2},
+    {"id": "exit-code-on-error", "severity": "S2", "area": "errors", "title": "A missing file exits 0 instead of 1", "match": ["exit", "missing", "not found", "0"], "need": 2},
+    {"id": "errors-on-stdout", "severity": "S3", "area": "errors", "title": "Errors are printed to stdout, not stderr", "match": ["stderr", "stdout"], "need": 1},
+    {"id": "delimiter-flag", "severity": "S2", "area": "options", "title": "--delimiter (as documented) isn't recognised; the code expects --delim", "match": ["delimiter", "--delim"], "need": 1},
+    {"id": "bom-header", "severity": "S2", "area": "input", "title": "A UTF-8 file with a BOM (Excel) breaks the first column's name", "match": ["bom", "byte-order", "byte order", "excel", "utf-8-sig", "\ufeff"], "need": 1},
+    {"id": "empty-file-crash", "severity": "S2", "area": "input", "title": "An empty file crashes with a traceback", "match": ["empty", "traceback", "indexerror", "crash"], "need": 2},
+    {"id": "version-mismatch", "severity": "S4", "area": "options", "title": "--version prints 1.1.0, but the docs say 1.2.0", "match": ["version", "1.1.0", "1.2.0"], "need": 2}
+  ]
+}

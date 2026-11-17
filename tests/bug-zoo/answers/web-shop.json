@@ -1,0 +1,18 @@
+{
+  "app": "web-shop",
+  "planted": [
+    {"id": "wrong-password-500", "severity": "S2", "area": "auth", "title": "A wrong password for a real account shows a 500 error page", "match": ["500", "internal server error", "wrong password", "incorrect password"], "need": 2},
+    {"id": "idor-orders-api", "severity": "S1", "area": "security", "title": "Any signed-in user can read any order through /api/orders/:id", "match": ["api/orders", "another user", "other user", "user b", "user a", "idor", "ownership", "someone else"], "need": 2},
+    {"id": "admin-open", "severity": "S1", "area": "admin", "title": "The /admin page is open to any signed-in customer", "match": ["/admin", "admin"], "need": 1},
+    {"id": "negative-qty", "severity": "S2", "area": "cart", "title": "Cart quantity accepts negative numbers and the total goes negative", "match": ["negative", "-1", "quantity"], "need": 2},
+    {"id": "empty-cart-undefined", "severity": "S3", "area": "cart", "title": "An empty cart shows 'undefined' instead of 'Your cart is empty'", "match": ["undefined", "empty cart", "cart is empty"], "need": 1},
+    {"id": "pricing-typo", "severity": "S4", "area": "content", "title": "Typo 'Recieve' on the pricing page", "match": ["recieve", "typo", "spelling"], "need": 1},
+    {"id": "terms-404", "severity": "S3", "area": "content", "title": "The footer's Terms link is a 404", "match": ["terms", "404"], "need": 2},
+    {"id": "search-xss", "severity": "S2", "area": "security", "title": "Search echoes the query as raw HTML (reflected XSS)", "match": ["xss", "script", "escap", "inject", "raw html", "<b>", "html injection"], "need": 1},
+    {"id": "signup-empty-email", "severity": "S3", "area": "auth", "title": "Sign-up accepts an empty or malformed email", "match": ["email", "sign-up", "signup", "sign up", "empty", "invalid", "malformed"], "need": 3},
+    {"id": "console-error-product", "severity": "S3", "area": "product", "title": "Product pages throw a console error and reviews never load", "match": ["console", "reviewcache", "reviews", "referenceerror", "loading reviews"], "need": 2},
+    {"id": "secret-in-bundle", "severity": "S1", "area": "security", "title": "A payments secret key is shipped in /static/app.js", "match": ["sk_test", "secret", "key", "app.js", "bundle"], "need": 2},
+    {"id": "checkout-bar-phone", "severity": "S2", "area": "cart", "title": "At phone width the checkout bar overflows (fixed 600px width)", "match": ["phone", "390", "mobile", "overflow", "horizontal scroll", "width", "off-screen", "cut off"], "need": 2},
+    {"id": "address-not-saved", "severity": "S2", "area": "account", "title": "'Address saved' is shown but the address isn't stored", "match": ["address", "saved", "persist", "not stored", "not saved", "lost"], "need": 2}
+  ]
+}

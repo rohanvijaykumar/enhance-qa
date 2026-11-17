@@ -1,0 +1,12 @@
+{
+  "name": "enhance-qa",
+  "description": "enhance-qa: a QA team for your app.",
+  "owner": { "name": "enhance-qa contributors" },
+  "plugins": [
+    {
+      "name": "enhance-qa",
+      "source": "./",
+      "description": "A QA department for any software: test, fix, verify and release-check build by build."
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+interface:
+  display_name: "enhance-qa"
+  short_description: "A QA team for your app: test, fix, verify, release"
+  default_prompt: "QA my app with enhance-qa"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,3 @@
+# enhance-qa: evidence and local state
+qa/evidence/
+qa/.state/

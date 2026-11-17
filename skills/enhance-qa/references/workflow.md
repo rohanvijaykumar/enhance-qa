@@ -13,6 +13,12 @@ The shared process the lead follows in every mode. Each mode file says which pha
    - If the tree is the same as the last tested build, it's the same build. Say so, and only run what the mode needs: pending verifications, new questions answered, the user's explicit request.
    - List uncommitted files that the snapshot included.
 7. `qa next-id run` gives the run number. Write the run file's front matter and a "Scope" section now, so an interruption can resume.
+8. **Checks edited together with the code they judge.** A change must not rewrite the check that grades it.
+   - Compare `qa/checklist/` with the last tested build's branch commit: `git diff <last head> -- qa/checklist`, plus uncommitted edits.
+   - If a check's Steps or Expect changed in the same commit as product code under its area's `Paths`, or in the same set of uncommitted edits, and its `Source` records no user decision for it:
+     - test it against its previous expectation;
+     - add a "needs you" line: "CART-003's expected result changed together with cart code in 4f3a2c1. Is the new behaviour intended?"
+   - The user's own edits made on their own are normal. Don't flag those.
 
 ## 1. Intake gate
 
@@ -70,6 +76,12 @@ The shared process the lead follows in every mode. Each mode file says which pha
 
 - **Confirm severity** (`policies/severity.md`) and set the priority from the stage's bug bar.
 - **Group duplicates:** `duplicate`, with `duplicate_of`.
+- **New or pre-existing?** In `check` and after-change runs, tag a bug `pre-existing` when the problem was already there before this change:
+  - its check failed on the last tested build too;
+  - or the code it depends on didn't change since then.
+
+  The summary keeps these apart from what the change introduced, so the user's coding agent isn't sent after old problems as if it caused them.
+- **Class:** give each bug a `class:` naming the kind of mistake, when it's clear from the evidence. The fixer refines it from the cause.
 - **Judgement calls** (bug or by design? a behaviour change?) get `needs-decision` and a "Needs you" line (`policies/checkpoints.md`).
 - **The fix list:**
   - `fix-now` bugs that are clear defects, or that the user approved;
@@ -86,8 +98,9 @@ Only in modes that fix (`fix`, `loop`, `check` or `full` when autonomy allows, o
    - Clear one-file defects go to a balanced-tier fixer, batched by area.
    - Security, auth, data and payment bugs, multi-file fixes and second attempts go to a strong-tier fixer.
 4. `qa gate --role fixer` fails on any edit to the checklist, the plan or other bugs' fields.
-5. **Status:** `fixed`, with `fixed_in` set to the commit.
-6. **Stop fixing for this run** after two reverts in a row; testing and reporting still finish.
+5. **Status:** `fixed`, with `fixed_in` set to the commit. Copy the fixer's `Class:` line into the bug's `class:`.
+6. **Siblings:** candidates the fixer reports (the same mistake somewhere else) go to the verifier in phase 7, with neutral briefs like any candidate. Reproduced ones are filed and join the fix list.
+7. **Stop fixing for this run** after two reverts in a row; testing and reporting still finish.
 
 ## 7. Verify fixes
 
@@ -111,11 +124,12 @@ Only in modes that fix (`fix`, `loop`, `check` or `full` when autonomy allows, o
    - signal (share of findings acted on), cost ledger;
    - "Needs you", "Not covered" and the verdict.
 2. **Merge the testers' "Learned" lines into `qa/notes.md`.** Keep it short; drop duplicates.
-3. `qa coverage`, then `qa status --write`.
-4. `qa validate`. Fix any format problems you introduced.
-5. **Stop anything you started:** dev servers, emulators, browsers, background watchers. Leave alone anything that was already running when the run began.
-6. `qa phase end`, then `qa lock release`.
-7. **Give the user the summary block** (SKILL.md). It names only new bugs at S3 or above, the verdict, the needs-you items, and the paths.
+3. **Propose lessons** (`policies/lessons.md`): two or more bugs with the same `class:`, or an escaped bug that shows a gap, become a proposed rule for the coding agent. That can be a lint rule, a `verify` step, or one line in CLAUDE.md or AGENTS.md. Add each to "Needs you" and to `qa/lessons.md`.
+4. `qa coverage`, then `qa status --write`.
+5. `qa validate`. Fix any format problems you introduced.
+6. **Stop anything you started:** dev servers, emulators, browsers, background watchers. Leave alone anything that was already running when the run began.
+7. `qa phase end`, then `qa lock release`.
+8. **Give the user the summary block** (SKILL.md). It names only new bugs at S3 or above, the verdict, the needs-you items, and the paths. Bugs tagged `pre-existing` go on their own line ("Also found, already there before this change: …"), not under "New".
 
 ## Finishing what was started
 

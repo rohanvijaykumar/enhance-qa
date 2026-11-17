@@ -1,5 +1,6 @@
 {
   "app": "web-shop",
+  "set": "tuning",
   "planted": [
     {"id": "wrong-password-500", "severity": "S2", "area": "auth", "title": "A wrong password for a real account shows a 500 error page", "match": ["500", "internal server error", "wrong password", "incorrect password"], "need": 2},
     {"id": "idor-orders-api", "severity": "S1", "area": "security", "title": "Any signed-in user can read any order through /api/orders/:id", "match": ["api/orders", "another user", "other user", "user b", "user a", "idor", "ownership", "someone else"], "need": 2},

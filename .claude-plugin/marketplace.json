@@ -1,12 +1,12 @@
 {
   "name": "enhance-qa",
-  "description": "enhance-qa: a QA team for your app.",
+  "description": "enhance-qa: a QA team for any app, inside your coding agent.",
   "owner": { "name": "enhance-qa contributors" },
   "plugins": [
     {
       "name": "enhance-qa",
       "source": "./",
-      "description": "A QA department for any software: test, fix, verify and release-check build by build."
+      "description": "A QA team for any app: test, fix, verify and release-check build by build. Web, mobile, desktop, games, APIs, CLIs and more."
     }
   ]
 }

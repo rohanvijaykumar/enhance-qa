@@ -18,7 +18,7 @@ parallel_testers: 3
 checks_per_tester: 15
 agent_turns: 40           # an agent's turn budget; it then hands the rest to a fresh agent (never ends the pass)
 fixes_per_batch: 20       # fixes are made and verified in batches until all are done
-max_loop_rounds: 10       # safety ceiling for loop only
+max_loop_rounds: 3        # loop only: rounds before stepping back
 max_usd_per_run:          # empty = no limit. If set, the run pauses there and resumes next time
 rotation: 10
 replay: off                # on | off

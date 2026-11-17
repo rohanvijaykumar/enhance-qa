@@ -25,7 +25,8 @@ All phases in `workflow.md`:
 4. Spot audit.
 5. Confirm candidates, then triage.
 6. Fix and verify, per autonomy.
-7. Report.
+7. **Gardening:** the scout proposes retiring, merging or re-planning stale checks, and dropping lesson lines that tooling now enforces (`roles/scout.md`, Job 5). These are proposals in "Needs you", never applied without the user's OK.
+8. Report.
 
 At the end, set `last_full:` to today and `releases_since_full: 0` in the plan.
 

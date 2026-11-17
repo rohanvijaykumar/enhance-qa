@@ -38,6 +38,10 @@ Run these quietly; don't install anything without the user's OK.
    - **Scope your expectations.** `expectText` searches the whole page, including the nav and footer, so "Terms" also matches the footer link on a 404 page. Use `"in": {...}` to name the region, or check the heading or title (`expectTitle`).
    - **Read the error lists in the result:** `pageErrors` (uncaught script errors), `serverErrors` (5xx), `httpErrors` (4xx, except the favicon), `failedRequests` and `console`. A check can pass its expectation and still reveal a bug there.
    - **Browsers:** it tries Playwright's own Chromium first, then the installed Google Chrome, then Microsoft Edge, each with a fresh temporary profile (never the user's). The result says which one ran (`browser`).
+   - **Video:**
+     - `"video": "on-failure"` keeps a recording only when a step fails (`<evidence>-fail.webm`);
+     - `"video": "always"` keeps it on success too (`<evidence>-end.webm`). The verifier uses this for after-evidence on interactive fixes: the bug's before, next to the fix's after.
+     - Recording needs Playwright's ffmpeg (`npx playwright install ffmpeg`, a download, so only with the user's OK). Without it the check still runs, and the result's `videoNote` says why there's no video; use screenshots instead.
 2. **Playwright tests or scripts written for the check,** when a plan isn't enough (uploads, multiple tabs, network mocking). Keep them under `qa/evidence/<run>/scripts/`, unless replay is on (`integrations/replay.md`).
 3. **A Playwright or Chrome DevTools MCP, or agent-browser.** Use interactive-only or element-scoped snapshots and `find`, never a full snapshot after every action. In Codex, prefer CLI drivers over MCP: tool definitions add 4–6k tokens per request.
 4. **The agent's own browser** (desktop app browser pane, Codex app browser). Fine for interactive sessions; record what was checked in text.

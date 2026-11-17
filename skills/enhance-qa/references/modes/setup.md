@@ -26,8 +26,8 @@ Before I start, here's what I found. Reply "go", or correct any line.
    each other's data). No real emails, payments or customer data, ever.
 5. Fixing: I'll fix clear bugs myself, one commit each, and ask before anything
    that changes how the app behaves, looks or reads
-6. Add a 3-line note to CLAUDE.md/AGENTS.md so your coding agent knows about qa/,
-   and the read-only QA role files? (recommended)
+6. Add a short note to CLAUDE.md/AGENTS.md so your coding agent knows about qa/
+   and hands QA requests to me, plus the read-only QA role files? (recommended)
 7. Save stable checks as automated tests so later runs cost less? (adds Playwright
    as a dev dependency)
 ```
@@ -53,7 +53,8 @@ Before I start, here's what I found. Reply "go", or correct any line.
 
 Do these now, and only these:
 - **Role files:** copy `<skill>/roles/claude/*.md` to `.claude/agents/`, and `<skill>/roles/codex/*.toml` to `.codex/agents/`. Don't overwrite existing files with the same names; report them instead.
-- **The coding-agent note:** append `<skill>/templates/snippets/agents-note.md` to `CLAUDE.md` and/or `AGENTS.md`, creating the file if needed. It's 3 lines. Never rewrite the rest of the file.
+- **The coding-agent note:** append `<skill>/templates/snippets/agents-note.md` to `CLAUDE.md` and/or `AGENTS.md`, creating the file if needed. It's a few lines. Never rewrite the rest of the file.
+  - **Its first line routes QA requests to this skill.** Agents with many skills installed sometimes miss a skill whose description was shortened to fit the listing. A line in CLAUDE.md or AGENTS.md is always read.
 - **Replay:** add the test runner as a dev dependency (`references/integrations/replay.md`). This changes dependencies, so it happens only with this explicit OK.
 - **After-change check:** `references/integrations/after-change.md`.
 - **Test accounts:** create them only in the user's local or test environment, with obviously fake data (`qa-user-a@example.test`). Put their credentials in a git-ignored `.env.qa` or `qa/.state/accounts.env`, never in `qa/notes.md`.

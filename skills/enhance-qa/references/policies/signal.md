@@ -28,6 +28,8 @@ Noise is the main reason teams abandon QA tools. Google retires analysers whose 
 - Record intermittent results as n/N (for example `fail 2/3`).
 - File a bug when it reproduces 2 of 3 times, or at once if it's severe (S1).
 - A check that flips between builds without related changes is tagged `flaky` in the checklist, and the lead looks for an environmental cause before filing anything.
+- **Never make a flaky check pass** by waiting longer, adding sleeps or retrying until it goes green. Find the cause: test data, timing, environment, or a real race in the product (then it's a bug).
+- **A check or replay that stays flaky with no cause found is retired,** with the reason written down. Don't leave it running to train everyone to ignore failures.
 
 ## The share of findings acted on
 

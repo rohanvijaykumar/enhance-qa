@@ -22,7 +22,7 @@ Plan (JSON): {
   "saveStorageState": "qa/.state/sessions/user-a.json", save the session after the steps
   "timeout": 10000,                            ms per step
   "screenshot": "on-failure" | "always" | "never",   default on-failure
-  "video": "off" | "on-failure",               default off
+  "video": "off" | "on-failure" | "always",    default off ("always" keeps it on success too: after-evidence for fixes)
   "evidence": "qa/evidence/007/cart-004",      path prefix for screenshots and videos
   "steps": [ … ]
 }
@@ -195,10 +195,23 @@ async function main() {
   if (plan.colorScheme) ctxOpts.colorScheme = plan.colorScheme;
   if (plan.locale) ctxOpts.locale = plan.locale;
   if (plan.storageState && fs.existsSync(plan.storageState)) ctxOpts.storageState = plan.storageState;
-  if (videoMode === 'on-failure' && evidence) ctxOpts.recordVideo = { dir: path.dirname(evidence), size: { width: Math.min(viewport.width, 1280), height: Math.min(viewport.height, 800) } };
-  const context = await browser.newContext(ctxOpts);
+  if ((videoMode === 'on-failure' || videoMode === 'always') && evidence) ctxOpts.recordVideo = { dir: path.dirname(evidence), size: { width: Math.min(viewport.width, 1280), height: Math.min(viewport.height, 800) } };
+  // Video needs Playwright's own ffmpeg. Without it, run the check anyway and say why there's no video.
+  let videoNote;
+  let context;
+  let page;
+  try {
+    context = await browser.newContext(ctxOpts);
+    page = await context.newPage();
+  } catch (e) {
+    if (!ctxOpts.recordVideo || !/ffmpeg/i.test(String(e && e.message))) throw e;
+    if (context) await context.close().catch(() => {});
+    delete ctxOpts.recordVideo;
+    videoNote = "No video: Playwright's ffmpeg isn't installed. With the user's OK: npx playwright install ffmpeg";
+    context = await browser.newContext(ctxOpts);
+    page = await context.newPage();
+  }
   context.setDefaultTimeout(timeout);
-  const page = await context.newPage();
 
   const consoleMsgs = [];
   const pageErrors = [];
@@ -330,8 +343,8 @@ async function main() {
   if (video) {
     try {
       const p = await video.path();
-      if (failed && evidence) {
-        videoPath = `${evidence}-fail.webm`;
+      if (evidence && (failed || videoMode === 'always')) {
+        videoPath = `${evidence}-${failed ? 'fail' : 'end'}.webm`;
         fs.renameSync(p, videoPath);
       } else {
         fs.rmSync(p, { force: true });
@@ -354,6 +367,7 @@ async function main() {
     httpErrors: httpErrors.length ? httpErrors : undefined,
     failedRequests: failedRequests.length ? failedRequests : undefined,
     evidence: shots.length || videoPath ? [...shots, ...(videoPath ? [videoPath.replace(/\\/g, '/')] : [])] : undefined,
+    videoNote,
     ms: Date.now() - started,
   };
   emit(result, failed ? 1 : 0);

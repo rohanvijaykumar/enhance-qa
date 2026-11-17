@@ -1,0 +1,17 @@
+id,should_trigger,prompt
+explicit-slash,true,/enhance-qa
+qa-my-app,true,QA my app
+ready-to-ship,true,Is this ready to ship?
+check-my-change,true,Check what I just changed before I commit
+log-a-bug,true,Users say the --version flag prints the wrong number. Log it as a bug and check it.
+release-go-no-go,true,Give me a go/no-go for the 1.0 release
+bug-bash,true,Do a bug bash on this tool
+smoke-after-deploy,true,We just shipped a new version. Smoke test it the way a QA team would.
+test-like-a-user,true,Test this app the way a real user would and tell me what's broken
+unit-test,false,Write a unit test for the count function
+review-diff,false,Review my last commit's diff for mistakes
+run-linter,false,Run the linter and fix the warnings
+explain-code,false,Explain what wordcount.py does
+fix-readme-typo,false,Fix the typo in the README
+add-feature,false,Add a --json option that prints the counts as JSON
+qa-vs-qc,false,What's the difference between QA and QC?

@@ -9,18 +9,21 @@ The fixer is a separate agent from the testers and the verifier. These rules bin
 3. **Order.** Severity first, then grouped by area so the fixer keeps context.
 4. **One bug, one commit.**
    - The message is `fix(qa): BUG-019 Wrong password shows a 500 page`, so any single fix can be undone with `git revert`.
+   - Every fix commit is stamped with how it was checked before committing: trailers `QA-Bug:`, `QA-Test:` (the test, or `none` with the reason) and `QA-Checked:` (`roles/fixer.md` has an example). `git log --grep "QA-Test: none"` then finds fixes that went in without a test.
    - Before the first fix of a run, if there's uncommitted work, ask once whether to save it as a checkpoint commit (`chore(qa): checkpoint before QA fixes`). Remember the answer in `qa/plan.md` (`checkpoint_commit: yes|no`).
    - If the answer is no, fixes stay as uncommitted edits, listed per bug in the run file.
    - Without git, back up each file before editing it (`qa/.state/backup/<bug>/`) and list the changes.
 5. **Tests.**
    - Run the project's existing tests, type checks and linter before committing.
-   - Where the project has a test suite, first write a test that fails because of the bug, then make it pass.
+   - Where the project has a test suite, first write a test that fails because of the bug, then make it pass. For a broken invariant, prefer a property-based test if the project already has a property library; adding one is a dependency change and needs the user's OK.
    - A fix counts only after two consecutive passes with the product freshly restarted.
    - Never delete or skip tests, loosen assertions, raise timeouts to hide a race, or turn off lint rules or type checks.
 6. **Scope.** The smallest change that fixes the root cause, with no drive-by refactors and no new dependencies without the user's OK. The fix notes record the cause, the change, the files touched and the "halo": what else could be affected, which the verifier then tests.
+   - **Fix the class, not just the line.** The fixer names the bug's class and searches for the same mistake. Instances in the same area and flow are the same root cause, so they're fixed in the same commit. Instances elsewhere come back to the lead as candidates, to be reproduced and filed like any other.
+   - The bug's `class:` field records the class, so repeats can become lessons (`lessons.md`).
 7. **Batches and safety stops.**
    - Fixes are made in batches of `fixes_per_batch` (default 20), each batch verified before the next, until every eligible bug is done.
-   - Two attempts per bug. A bug reopened twice goes to the user as `needs-decision`, with what was tried, and the fixer moves on.
+   - Two attempts per bug. The second attempt starts over with a different approach, on the strong tier, instead of re-patching the same lines. A bug reopened twice goes to the user as `needs-decision`, with what was tried and a suggestion to rethink the approach, and the fixer moves on.
    - If two fixes in a row have to be reverted, fixing stops for this run: something bigger is wrong. Testing and reporting still finish.
 8. **Verification.** A fresh verifier, never the fixer:
    - re-runs the exact reproduction on the new build;

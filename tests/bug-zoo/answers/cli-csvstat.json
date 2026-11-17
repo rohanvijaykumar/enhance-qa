@@ -1,5 +1,6 @@
 {
   "app": "cli-csvstat",
+  "set": "held-out",
   "planted": [
     {"id": "mean-off-by-one", "severity": "S1", "area": "stats", "title": "The mean is wrong (divides by count + 1)", "match": ["mean", "average", "15", "20"], "need": 2},
     {"id": "exit-code-on-error", "severity": "S2", "area": "errors", "title": "A missing file exits 0 instead of 1", "match": ["exit", "missing", "not found", "0"], "need": 2},

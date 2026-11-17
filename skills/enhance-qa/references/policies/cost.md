@@ -75,7 +75,7 @@ In `qa/plan.md`. None of these ends a pass early, except `max_usd_per_run` when 
 | `checks_per_tester` | 15 | Batch size. Smaller batches mean smaller, cheaper contexts |
 | `agent_turns` | 40 | Turns per tester or verifier before it writes its notes and hands its remaining work to a fresh agent. Fixers get twice this and the scout three times, because their jobs are longer. Never ends the pass |
 | `fixes_per_batch` | 20 | Fixes are made in batches of this size, each batch verified before the next, until every eligible bug is done |
-| `max_loop_rounds` | 10 | A safety ceiling for `loop` only, against a loop that never converges. Loops normally end much earlier (`modes/loop.md`) |
+| `max_loop_rounds` | 3 | For `loop` only. After this many rounds the loop steps back and reports what's left, instead of re-finding old problems (`modes/loop.md`) |
 | `max_usd_per_run` | (empty: no limit) | **Opt-in hard limit.** When set and reached, the lead finishes the current check, saves the run as `interrupted`, and the next `/enhance-qa` resumes exactly where it stopped. Where the platform supports a budget flag (`claude -p --max-budget-usd`), use it with the same value |
 
 ## Handovers between agents

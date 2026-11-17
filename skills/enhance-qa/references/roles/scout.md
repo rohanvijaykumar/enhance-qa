@@ -94,6 +94,16 @@ Follow `references/coverage/byo.md`:
 - keep the original numbering in the title;
 - mark items that need certification or hardware as `gate` or `device`.
 
+## Job 5: gardening (`full` passes)
+
+Checklists and rules only grow if nobody tidies them, and a stale check costs time on every run. Review the checklist and `qa/lessons.md`, then propose (never apply) the following, each as a "needs you" line with the reason:
+- **Retire** checks for features that no longer exist: the screen, route, command or option is gone. Use `Retired: <date> <reason>`; IDs are never reused.
+- **Merge** checks that test the same thing in the same way.
+- **Re-plan** checks that were `blocked` or `skip` in each of the last three runs: fix the setup, rewrite them as human checks, or retire them.
+- **Drop** CLAUDE.md or AGENTS.md lesson lines that a lint rule or test now enforces (`policies/lessons.md`).
+
+Regression checks stay unless their feature is gone: they protect fixes. Retiring or deleting checks needs the user's OK (`policies/checkpoints.md`).
+
 ## Reply
 
 At most 12 lines:

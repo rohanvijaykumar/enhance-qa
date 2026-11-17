@@ -12,16 +12,22 @@ When the user's coding agent finishes a change, a fast-tier smoke and impact che
 
 ## Claude Code: through the project `verify` skill
 
-Since v2.1.286, Claude Code runs a project skill named `verify` before each commit, except for docs or test changes. Strictly, Claude Code's commit instructions tell Claude to run it, so it isn't guaranteed.
+Since v2.1.286, Claude Code runs a project skill named `verify` before each commit, except for docs or test changes. Strictly, Claude Code's commit instructions tell Claude to run it, so it isn't guaranteed. The Claude Code team recommends this as every project's smoke-test harness: fast, reliable, and run before committing.
 
-1. **If `.claude/skills/verify/SKILL.md` doesn't exist,** create it from `<skill>/templates/snippets/verify-skill.md`.
+1. **If `.claude/skills/verify/SKILL.md` doesn't exist,** create it from `<skill>/templates/snippets/verify-skill.md`, with the user's OK.
 2. **If it exists,** show the user the lines to add, from the same snippet's "Add this section" part. Never overwrite it.
-3. The section tells Claude to run `/enhance-qa` in after-change mode ("enhance-qa quick check of what changed"), and to report possible problems before committing.
+3. **The order is scripted first:**
+   - the project's own checks;
+   - enhance-qa's recorded replay scripts, which cost no tokens;
+   - trying the change once like a user;
+   - only then, if `after_change_check: on`, the agent quick check.
+
+   Deterministic checks catch most regressions for free and don't flake the way agent checks can.
 
 ## Codex and other tools
 
-Add a line to AGENTS.md (`<skill>/templates/snippets/agents-note.md` has an optional line for it): "After finishing a change, run `$enhance-qa quick check of what changed` and report possible problems." This depends on the agent following AGENTS.md, so it isn't guaranteed either.
+Add a line to AGENTS.md (`<skill>/templates/snippets/agents-note.md` has an optional line for it): "After finishing a change, run the project's checks and enhance-qa's replay scripts (the checks with a `Replay:` path), then `$enhance-qa quick check of what changed`, and report possible problems." This depends on the agent following AGENTS.md, so it isn't guaranteed either.
 
 ## Turning it off
 
-Set `after_change_check: off`, and remove the section from the `verify` skill or the AGENTS.md line.
+Set `after_change_check: off`. The `verify` skill's scripted steps (project checks and replay scripts) keep running, because they cost nothing. To stop those too, remove the enhance-qa section from the `verify` skill, or the AGENTS.md line.

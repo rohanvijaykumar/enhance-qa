@@ -55,7 +55,8 @@ On /login, a wrong password throws "user.compare is not a function" (auth.ts:42)
 | `found` | yes | `build N · CHECK-ID or charter · environment` |
 | `repro` | yes | Reproduction count on the found build, such as `3/3` or `2/3` |
 | `area` | yes | The area file it belongs to (`auth` for `checklist/auth.md`) |
-| `tags` | no | Inline list: `security`, `a11y`, `escaped`, `regression`, `not-useful`, `scanner`, `flaky` |
+| `tags` | no | Inline list: `security`, `a11y`, `escaped`, `regression`, `pre-existing`, `not-useful`, `scanner`, `flaky`. `pre-existing` means the problem was already there before the change being checked. It's still a bug, but the latest change didn't cause it |
+| `class` | no | The kind of mistake, in a short kebab-case phrase (`trusts-client-quantity`, `missing-ownership-check`). The fixer names it in its notes; the lead copies it here. Repeats become lessons (`policies/lessons.md`) |
 | `source` | no | `tester` (default), `reported` (the user saw it), `escaped` (a user in the wild saw it), `scanner` (from a platform scanner) |
 | `fixed_in` | no | The fix commit (short SHA) |
 | `verified_in` | no | The build the verifier closed it on |

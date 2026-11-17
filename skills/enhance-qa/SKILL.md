@@ -1,6 +1,6 @@
 ---
 name: enhance-qa
-description: "Use when the user wants their software QA'd the way a real QA team would do it: 'QA my app', a test pass or bug bash, 'check what I just changed', 'is this ready to ship or release?', fix or verify the QA bugs, a release go/no-go, a smoke test after a deploy, or logging a bug they saw. Runs a small QA department over any kind of software (web, mobile, desktop, CLI, API, libraries, games, audio plugins, browser extensions, AI features and more). A scout maps the product and writes a checklist, testers use it the way people do, a verifier reproduces every bug and verifies every fix, and a separate fixer fixes bugs one commit at a time. Keeps a plain-Markdown record in qa/ across builds, picks the right pass for the project's stage, and keeps cost low. Not for writing a single unit test, reviewing a diff or running a linter."
+description: "Use when the user wants their software QA'd the way a real QA team would do it: 'QA my app', 'test it like a real user', 'what's broken?', a test pass or bug bash, 'check what I just changed', 'is this ready to ship or release?', fix or verify the QA bugs, a release go/no-go, a smoke test after a deploy, or logging a bug they saw. Runs a small QA department over any kind of software (web, mobile, desktop, CLI, API, libraries, games, audio plugins, browser extensions, AI features and more). A scout maps the product and writes a checklist, testers use it the way people do, a verifier reproduces every bug and verifies every fix, and a separate fixer fixes bugs one commit at a time. Keeps a plain-Markdown record in qa/ across builds, picks the right pass for the project's stage, and keeps cost low. Not for writing a single unit test, reviewing a diff or running a linter."
 license: MIT
 compatibility: "Claude Code or Codex; also Cursor, Copilot, Gemini CLI and Antigravity. Works best in a git repo. Node 18+ or Python 3.8+ for the helper scripts."
 metadata:
@@ -56,7 +56,7 @@ The user can name a mode, say it in plain English, or say nothing. With nothing,
 | `bug "…"` | The user describes a bug they or a user saw | Reproduce, file it, add a regression check |
 | `prod` | "prod", "after deploy", a production URL | Read-only smoke test of the live product |
 | `release` | "release", "final", "ship", "go/no-go", or a release-candidate tag | Freeze, full regression, release gates, human checklist, go/no-go report |
-| `loop` | "loop", "until clean" | Test → fix → verify until the exit criteria are met, a fresh pass finds nothing new, or only the user's decisions are left |
+| `loop` | "loop", "until clean" | Test → fix → verify until the exit criteria are met, a fresh pass finds nothing new, or only the user's decisions are left. After 3 rounds it steps back and reports what's left |
 | `fix` | "fix", or fix-now bugs are waiting and autonomy allows | The fixer works through fix-now bugs; a verifier checks each fix |
 | `full` | First baseline, milestones, wide changes, or 30 days or 10 releases since the last full pass on a live product | Every check, environments pairwise, an exploratory session per area |
 | *an area* | The user names a feature ("checkout") | A focused check plus an exploratory session on that area |
@@ -106,11 +106,11 @@ Details: `references/policies/cost.md`.
 
 - **Process:** `references/workflow.md`, `references/modes/`.
 - **Roles:** `references/roles/`.
-- **Policies:** `references/policies/` (safety, signal, checkpoints, severity, stages, cost, fixing).
+- **Policies:** `references/policies/` (safety, signal, checkpoints, severity, stages, cost, fixing, lessons).
 - **File formats:** `references/formats/` (qa folder, checklist, bugs, runs, plan, notes, status).
 - **Coverage library:** `references/coverage/README.md` (base layer, 22 platform modules, 24 feature packs, 16 release gates, bring your own).
 - **Platforms and app drivers:** `references/platforms/`.
-- **Optional extras:** `references/integrations/` (replayable tests, after-change check, CI, bug trackers, Claude Code's `run` and `verify` skills).
+- **Optional extras:** `references/integrations/` (replayable tests, after-change check, CI, bug trackers, Claude Code's `run` and `verify` skills, differential testing of rewrites against the previous build).
 - **Templates:** `templates/`. Installable role files: `roles/`.
 
 ## The summary at the end of every run

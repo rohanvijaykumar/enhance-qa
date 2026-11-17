@@ -32,8 +32,9 @@ Regression checks from verified bugs are the first candidates, because they prot
 ## Running replays
 
 - In the intake gate and in scope selection, a check with a `Replay` runs its script instead of an agent. The result goes in the run file as `auto`, with the test report as evidence.
-- **A failing replay triggers an agent re-check** of the same check before anything is filed. Generated tests are flaky: Slack measured 8–48% false failures. If the agent passes it, mark the replay `flaky` and have the fixer, or the user's agent, repair the test separately. Never delete it.
-- **A replay that fails twice in a row** on builds where the agent passes gets retired (`Replay:` removed, noted in the run file), and the check goes back to agents.
+- **A failing replay triggers an agent re-check** of the same check before anything is filed. Generated tests are flaky: Slack measured 8–48% false failures.
+- **If the agent passes it,** mark the replay `flaky`. The fixer, or the user's agent, then looks for the cause (timing, test data, environment) and repairs the test. A repair never adds sleeps, longer timeouts or retries, because those hide real races.
+- **A flaky replay with no cause found by the next pass is retired:** `Replay:` is removed and the reason written in the check (`Replay retired: <date> <reason>`) and in the run file. The check goes back to agents. A test that keeps failing for no reason teaches everyone to ignore failures, which is worse than no test.
 
 ## Who writes replays
 

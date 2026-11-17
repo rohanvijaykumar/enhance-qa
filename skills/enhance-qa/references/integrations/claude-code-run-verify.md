@@ -8,9 +8,15 @@
 
 ## `verify`
 
-- **What it is:** since v2.1.286, a project skill named `verify` is run before each commit, except for docs or test changes. Strictly, Claude Code's commit instructions tell Claude to run it, so it isn't guaranteed.
-- **What enhance-qa adds to it:** the after-change check (`after-change.md`), when the user opts in.
+- **What it is:** since v2.1.286, a project skill named `verify` is run before each commit, except for docs or test changes. Strictly, Claude Code's commit instructions tell Claude to run it, so it isn't guaranteed. Claude Code also ships a built-in `/verify` that builds, runs and observes a change. A project `verify` skill is where a team writes down its own steps.
+- **How they fit together:**
+  - **`verify`** checks each change as the coding agent makes it, in seconds to a minute;
+  - **enhance-qa** is the independent team behind it: a checklist and record across builds, a separate verifier for every bug and fix, regression checks and release go/no-go.
+- **What enhance-qa adds to `verify`:**
+  - its recorded replay scripts, which cost no tokens and always run;
+  - the after-change agent check, only when the user opts in (`after-change.md`).
 - **If a `verify` skill already exists,** enhance-qa proposes the addition and never overwrites it.
+- **Lessons** (`policies/lessons.md`) can add diff-triggered steps to the `verify` skill, with the user's OK.
 
 ## Plugin form
 

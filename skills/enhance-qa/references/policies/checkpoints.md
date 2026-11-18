@@ -12,9 +12,10 @@ Some checkpoints apply at every level.
 | **Kickoff** | First run only | One message with guesses filled in; reply "go" or correct a line | Same, plus a review of the checklist before testing | Skipped when the README or AGENTS.md already answers it; assumptions go in the report |
 | **Unclear expected results** | Setup and new features | Listed as "questions for you"; testing continues, and those checks wait | Blocks until answered | The lead decides from product norms and marks the check `Assumed: yes` |
 | **Big run** | Estimate above `confirm_over_usd`, before the pass starts | One-line confirmation ("go", "lean" or "split"); then it runs to the end | Always confirms | Never asks |
+| **Pace check** | After the first round of batches, only when the rest will take more than about 1.5× the announced time | Asks: "keep going", "high-risk first" (the rest resumes next run) or "stop after this round". The testers keep working while it waits | Same | Keeps going, and notes the new estimate |
 | **Judgement calls** (bug or by design? defer? won't fix?) | Triage | Batched at the end of the run; the bug waits as `needs-decision` | Same | The lead decides conservatively and logs it |
 | **Fixes that change behaviour, looks, wording, data, auth, payments or dependencies** | Before fixing | Asks, batched | Asks for every fix | Fixes on a branch; the user reviews before merging |
-| **Clear defects** | Before fixing | Fixed automatically, one commit each | Asks | Fixed automatically |
+| **Clear defects** | Before fixing | During a test pass, S1–S2 are fixed automatically, one commit each. S3–S4 wait for `fix` or the user's own agent (`fix_during_run`). In `fix` mode, all of them are fixed | Asks | Fixed automatically, all severities |
 | **Human-only checks** (feel, sound, real devices, real payments, store submission) | Whenever relevant | Listed with exact steps. Never auto-passed. Must be done or explicitly waived before release | Same | Same |
 | **Go / no-go** | Release | The best verdict is "Ready for your approval", with the evidence; the user decides | Same | Same |
 | **Anything with outside effects** (real emails, SMS or payments; posting; deploying; changing production data) | Any time | Always asks | Always asks | Always asks |
@@ -45,7 +46,7 @@ Not a clear defect, so it asks first:
 
 When there's no one to ask (`claude -p`, `codex exec`, CI, a background session):
 - **Kickoff:** proceed with the best guesses only if the user's prompt says so ("go", "use defaults", "non-interactive"); otherwise write the kickoff into the run file and stop after recon.
-- **Big run:** run the announced scope to the end. Only a `max_usd_per_run` the user set can pause it, and the next run resumes it.
+- **Big run and pace check:** run the announced scope to the end, and note any new estimate in the run file. Only a `max_usd_per_run` the user set can pause it, and the next run resumes it.
 - **Every "asks" above** becomes a "needs you" item; the work it guards waits.
 
 ## The "needs you" list

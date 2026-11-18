@@ -2,6 +2,28 @@
 
 Noise is the main reason teams abandon QA tools. Google retires analysers whose findings developers don't act on more than 10% of the time. Hold this skill to the same bar.
 
+## Bugs, not wishes
+
+The job is to test every function the way a careful person would, and report what's broken. Nothing else. A finding is a bug only when one of these holds:
+- **It breaks a promise the product makes:** its docs, on-screen text, labels, settings and error messages, its own behaviour elsewhere in the product, or how an earlier build behaved.
+- **It does real harm, promise or not:**
+  - a crash, hang or freeze;
+  - lost, corrupted or leaked data;
+  - wrong output;
+  - a security or privacy hole;
+  - a dead end the user can't get out of;
+  - text that's cut off, overlapping or misspelled;
+  - an accessibility failure under WCAG 2.2 AA.
+
+Never file these, and never report them anywhere else:
+- missing features, or controls the product never offered;
+- suggestions, and "it would be nicer if…";
+- "other apps do it differently";
+- design and wording preferences;
+- targets QA made up: a memory, speed or size number the product never states. Measure it and record the number, but file only clear harm: memory that keeps growing, a hang, a freeze, input that lags enough to notice.
+
+A finding that fails this test is dropped. The run file's Signal line counts the drops ("6 wishes not filed") so the bar can be tuned, and that's all.
+
 ## What reaches the user
 
 1. **Only reproduced findings.** A tester's finding is a *candidate*. It becomes a bug only after the verifier reproduces it on the same build, with evidence. Exception: a severe finding (S1) that reproduced for the tester 2 of 3 times is filed at once and verified in parallel.

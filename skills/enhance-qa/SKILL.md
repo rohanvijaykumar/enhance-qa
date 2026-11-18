@@ -31,6 +31,7 @@ These hold at every autonomy level, and every role prompt repeats them. Full tex
 - The fixer never edits the checklist, expected results or test assertions to make something pass, and never closes bugs.
 - Only a fresh verifier closes a bug: one that neither found nor fixed it, with a neutral prompt.
 - No evidence, no verdict. Only reproduced findings reach the user.
+- **Bugs only.** Report something only when it breaks a promise the product makes, or does real harm: a crash, data loss, wrong output, a security hole, broken or unreadable UI, an accessibility failure. Never report missing features, suggestions, nice-to-haves, or targets QA made up (`references/policies/signal.md`).
 
 ## Every run, in this order
 
@@ -83,12 +84,15 @@ Overrides in `qa/plan.md` win.
 
 ## What waits for the user
 
-Only three things stop and wait:
+Only these stop and wait:
 - the kickoff on the first run;
 - a one-line OK before an unusually large run;
+- the pace check, only when a pass is running far over its estimate: keep going, high-risk first, or stop after this round;
 - the go/no-go decision.
 
-Everything else goes into one "needs you" list per run: unclear expected results, bug-or-by-design calls, and fixes that change behaviour, looks, wording, data, auth, payments or dependencies. Clear defects get fixed without asking at the default autonomy (Balanced). The three levels are in `references/policies/checkpoints.md`.
+Everything else goes into one "needs you" list per run: unclear expected results, bug-or-by-design calls, and fixes that change behaviour, looks, wording, data, auth, payments or dependencies.
+
+At the default autonomy (Balanced), a test pass fixes serious clear defects (S1–S2) without asking. The rest wait for `fix` or the user's own agent (`fix_during_run`). The three levels are in `references/policies/checkpoints.md`.
 
 ## Keep it cheap
 
@@ -97,7 +101,17 @@ Everything else goes into one "needs you" list per run: unclear expected results
 - **Run only what changed:** `qa select`.
 - **Route models by role,** with small, fresh testers and compact observation.
 - **Remember the app** in `qa/notes.md`.
-- **Estimate before, finish once started.** Cost is set by the scope chosen up front, not by cutting a pass short. An agent that reaches its turn budget hands its remaining work to a fresh agent. If spending runs well over the estimate, switch the rest to cheaper ways of doing the same checks; never skip them. The only hard spending stop is `max_usd_per_run`, which is off unless the user sets it, and it resumes on the next run.
+- **Estimate honestly, finish once started.**
+  - Cost is set by the scope chosen up front, not by cutting a pass short. Slow apps get honest times, and the user can "split" a long pass over several runs.
+  - An agent that reaches its turn budget hands its remaining work to a fresh agent.
+  - After the first round of batches, re-estimate from the real pace. If the rest will take far longer than announced, the user chooses at the pace check.
+  - The only hard spending stop is `max_usd_per_run`, which is off unless the user sets it. Whatever ends a pass early, the next run resumes it.
+- **Faster without testing less:**
+  - checks that share setup run together;
+  - prepared fixtures replace live downloads;
+  - up to 5 lanes when the machine allows;
+  - verifiers work by area;
+  - only serious bugs are fixed mid-pass.
 - **Interruptions don't lose work.** Progress is saved after every phase and batch, so `/enhance-qa` or "continue" resumes after a usage limit, a full context or a closed app.
 
 Details: `references/policies/cost.md`.
@@ -122,7 +136,7 @@ QA · Build 7 · check · 9 min
 ✓ 31 passed   ✗ 2 failed   ⏸ 1 blocked        Verdict: not ready — 1 major bug open
 Fixed and verified: BUG-012, BUG-015 · Reopened: BUG-014 (still fails at phone width)
 New: BUG-019 (major) a wrong password shows a 500 page · BUG-020 (minor) pricing typo
-Fixing now: BUG-019, BUG-020 (clear defects), then re-verifying
+Fixed now: BUG-019 (major). Ready for `/enhance-qa fix`: BUG-020
 Needs you (1 min): BUG-018 — "Delete account" has no confirmation step. Bug, or by design?
 Your checks: 2 human-only checks this build → qa/STATUS.md
 Details: qa/STATUS.md · qa/runs/007-check.md · ~$0.40 API-equivalent

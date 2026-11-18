@@ -29,6 +29,8 @@ A scout maps your app, testers use it the way real people do, a verifier double-
 
 You stay the product owner: you confirm the plan, make the judgement calls and decide when to ship. The lead plans each pass and briefs the team, and each role does one job.
 
+It tests every function a person can reach (every screen, control, setting, command and error) and reports only what's broken. That means things that break a promise your app makes, or do real harm. Feature requests and nice-to-haves are never filed.
+
 | Role | What it does | Why it matters |
 |---|---|---|
 | **Scout** | Maps the product, then writes the checklist (one file per area) and app notes | Testers never rediscover your app |
@@ -40,13 +42,14 @@ You stay the product owner: you confirm the plan, make the judgement calls and d
 Every run builds on the last: only what changed gets re-tested, fixed bugs get regression checks, and a release pass ends in a go/no-go report.
 
 **It stays out of your way:**
-- **Only three things stop and wait for you:**
+- **Only these stop and wait for you:**
   - the kickoff on the first run;
   - a one-line OK before an unusually large run;
+  - a pace check, only if a pass is running far longer than it said: keep going, high-risk first, or stop and resume next time;
   - the go/no-go decision.
 
   Everything else collects in one "needs you" list.
-- **It fixes clear defects itself,** one commit each, and asks before anything that changes how your app behaves, looks or reads. Data, auth, payments and dependencies wait for your OK too.
+- **It fixes serious bugs during a pass,** one commit each. The rest wait until you say `/enhance-qa fix`, or go to your own coding agent with a ready prompt. It always asks before anything that changes how your app behaves, looks or reads, and before touching data, auth, payments or dependencies.
 - **It learns from repeats.** When the same kind of bug shows up twice, it proposes a one-line rule for CLAUDE.md or AGENTS.md, or a lint rule, so your coding agent stops making that mistake. Nothing is added without your OK.
 - **It never pushes,** rewrites history or deploys.
 - **Run it beside your work:**
@@ -219,9 +222,18 @@ Targets at API prices for a small-to-medium app:
 
 Subscribers pay in usage limits instead, and the same levers apply.
 
-**A pass that starts, finishes.** Nothing cuts a run short halfway:
+**Big apps take longer, and it says so up front.** Testing every function of a desktop app that processes media is slow: a full first pass on a desktop video app measured about 6 hours and $55–70. The kickoff gives an honest estimate, and you can "split" a long pass over several runs, highest risk first.
+
+**Faster without testing less:**
+- checks that share setup run together;
+- small prepared sample files replace live downloads;
+- up to 5 testers run at once when your machine can take it;
+- verifiers work by area;
+- only serious bugs are fixed mid-pass.
+
+**A pass that starts, finishes.** Nothing cuts a run short behind your back:
 - an agent that uses up its turn budget hands its remaining checks to a fresh agent;
-- if spending runs over the estimate, the rest switches to cheaper ways of doing the same checks;
+- after the first round of checks, it re-estimates from the real pace. If the rest will take far longer than it said, it asks: keep going, high-risk first, or stop and resume next time;
 - if the platform stops the session (a usage limit, a closed laptop), running `/enhance-qa` again resumes where it stopped.
 
 The only hard spending stop is one you set yourself (`max_usd_per_run` in `qa/plan.md`), and it resumes too.

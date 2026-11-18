@@ -43,8 +43,10 @@ The shared process the lead follows in every mode. Each mode file says which pha
 - **Split agent checks into tester batches:**
   - one batch per area, or per small group of areas;
   - about `checks_per_tester` checks per batch (default 15);
-  - `parallel_testers` batches at a time (default 3), with the next batch starting as soon as one finishes, until every batch is done;
-  - scripted and one-screen checks go to the fast tier; multi-step flows and charters to the balanced tier.
+  - **group checks that share setup** (the same screen, input file, account or settings) and order them so each starts from the state the last one left, where the checks allow it. Setting up once per batch instead of once per check is the biggest time saver on slow apps;
+  - `parallel_testers` batches at a time, one lane each, with the next batch starting as soon as one finishes, until every batch is done. Use more lanes when the machine can run another copy of the app (`policies/cost.md`);
+  - scripted and one-screen checks go to the fast tier; multi-step flows and charters to the balanced tier;
+  - testers use the prepared fixtures (`qa/evidence/fixtures/`, listed in the notes) instead of fetching or generating their own inputs.
 
 ## 3. Test
 
@@ -60,17 +62,31 @@ The shared process the lead follows in every mode. Each mode file says which pha
    - its notes file `qa/runs/<run>/tester-<k>.md`.
 4. `qa gate --role tester` reverts anything outside the allowed files, and fails on checklist changes.
 5. `qa results merge <run>`.
-6. **Spot audit** (`check`, `full`): re-run about 10% of passes (at least one) with a different tester. Investigate any disagreement (`policies/signal.md`).
+6. **Pace check, after the first round of batches:**
+   - Re-estimate the time and cost left from the measured pace: checks per tester-hour on this app, not the starting figures.
+   - **If the rest will take more than about 1.5× what was announced,** say so in one message with the new estimate. In an interactive run, offer:
+     - "keep going": every announced check runs;
+     - "high-risk first": the high-risk checks now, the rest saved for the next run, which resumes them;
+     - "stop after this round": report what's done, and the next run resumes.
+   - Waiting for the answer doesn't stop the testers already running.
+   - A non-interactive run, or no answer, keeps going.
+   - Record the new estimate and the choice in the run file.
+7. **Spot audit** (`check`, `full`): re-run about 10% of passes (at least one) with a different tester. Investigate any disagreement (`policies/signal.md`).
 
 ## 4. Confirm candidates
 
-1. Collect the candidates from the tester notes. Group them by likely root cause, and drop ones that match "Don't report" in the notes.
+1. Collect the candidates from the tester notes. Group them by likely root cause. Drop:
+   - ones that match "Don't report" in the notes;
+   - anything that isn't a bug: a missing feature, a wish, a number the product never promised (`policies/signal.md`, "Bugs, not wishes"). Count the drops for the Signal line.
 2. `qa phase start --role verifier`.
-3. **Spawn a fresh verifier** (`roles/verifier.md`) with neutral briefs: for each candidate, only the steps, the expected result and its source. Never the tester's theory.
+3. **Spawn fresh verifiers** (`roles/verifier.md`) with neutral briefs: for each candidate, only the steps, the expected result and its source. Never the tester's theory.
+   - One verifier per area's candidates, several areas in parallel.
+   - Deterministic failures need only one clean reproduction.
 4. `qa gate --role verifier`.
 5. For each candidate:
    - **Reproduced** (2 of 3, or once for a severe one): `qa bug new …`, then fill in the sections. Status `open`, `repro` as measured, with the check's result linked.
    - **Not reproduced:** note it in the run file. Mark the check `flaky` if results were mixed; otherwise record "not reproduced" and file nothing.
+   - **Not a bug:** drop it, count it on the Signal line, and file nothing. If the check itself expected a feature the product doesn't have, mark the check `Retired: <date> tested a feature the product doesn't have`.
 
 ## 5. Triage
 
@@ -91,6 +107,8 @@ The shared process the lead follows in every mode. Each mode file says which pha
 ## 6. Fix
 
 Only in modes that fix (`fix`, `loop`, `check` or `full` when autonomy allows, or the user asked), and only for bugs the verifier reproduced. See `policies/fixing.md`.
+
+In a test pass, `fix_during_run` limits this phase: by default only S1–S2 clear defects. The rest are listed, each with its prompt, for `/enhance-qa fix` or the user's own agent. The summary says so ("Fixed: 3 serious bugs. 14 more are ready to fix: `/enhance-qa fix`").
 
 1. **Checkpoint commit question:** asked once, then remembered as `checkpoint_commit:`.
 2. `qa phase start --role fixer`.
@@ -133,7 +151,11 @@ Only in modes that fix (`fix`, `loop`, `check` or `full` when autonomy allows, o
 
 ## Finishing what was started
 
-- **A pass runs to the end of its announced scope.** Nothing here ends it early, except `max_usd_per_run` when the user has set it (`policies/cost.md`).
+- **A pass runs to the end of its announced scope.** Two things can end it early:
+  - the user's own choice at the pace check;
+  - `max_usd_per_run`, when the user has set it (`policies/cost.md`).
+
+  Either way the next run resumes what's left.
 - **An agent that reaches its turn budget** (`agent_turns`) writes its notes. Start a fresh agent with:
   - the same role and brief;
   - the checks it didn't reach, by ID. Re-run any check it left half-done from the start;

@@ -11,7 +11,9 @@
 | **S1 blocker** | Stops a core task for many users, loses or exposes data, takes money wrongly, or is a security hole. No workaround | Can't sign up or log in; checkout fails; user A can read user B's data; crash on launch; data deleted on save; secret key in the bundle; installer fails |
 | **S2 major** | Breaks an important feature or a common path, or seriously misleads, but a workaround exists or few users hit it | A wrong password shows a 500 page; search returns nothing for valid queries; export drops rows; a required flow broken at phone width; a missing permission check on a non-sensitive action |
 | **S3 minor** | Works, but wrongly or awkwardly in a way users notice | A wrong validation message; a confusing empty state; a layout break on one browser; a slow but finishing action; a non-critical console error |
-| **S4 cosmetic** | Polish only | Alignment, spacing, a minor typo outside the core flows, an inconsistent capitalisation |
+| **S4 cosmetic** | A small visible defect that doesn't change what the product does | Misaligned or clipped text, a minor typo outside the core flows, a wrong icon, inconsistent capitalisation |
+
+Severity grades bugs only. A missing feature or a "nicer if" idea isn't S4, because it isn't a bug at all (`signal.md`, "Bugs, not wishes").
 
 **Adjust up one level** when:
 - it's in a core flow (the first-run path, the money path, the main task);

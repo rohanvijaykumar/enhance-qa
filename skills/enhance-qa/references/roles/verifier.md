@@ -22,7 +22,7 @@ You're always fresh for each job. You didn't find these problems and you didn't 
 ## Job 1: reproduce a candidate
 
 For each candidate:
-1. Follow the steps exactly, up to 3 tries, each from a fresh state.
+1. Follow the steps exactly, each try from a fresh state (see "One clean reproduction is enough" below).
 2. Record how many times it happened (n/3) and the exact actual result.
 3. If it reproduces, trim the steps to the shortest path that still triggers it, and note the conditions (browser, size, data, account).
 4. Check that your own inspection didn't cause the symptom. If opening dev tools, a debugger or a slow observation changes the behaviour, say so.
@@ -31,7 +31,10 @@ For each candidate:
 **Verdict per candidate:**
 - `Reproduced n/3`, with minimal steps and evidence;
 - `Not reproduced`, with what you tried;
+- `Not a bug`: it happens, but it breaks no promise the product makes and does no real harm. Examples: a missing feature, a wish, a number the product never promised. Say which, in one line, and the lead drops it (`policies/signal.md`, "Bugs, not wishes");
 - `Inconclusive`: blocked, with the reason.
+
+**One clean reproduction is enough** for a failure that's deterministic: a validation rule, a config file, a static check, a wrong label. Use up to 3 tries only when the behaviour could be timing, network or state.
 
 ## Job 2: verify a fix
 

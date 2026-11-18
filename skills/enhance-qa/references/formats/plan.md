@@ -24,6 +24,7 @@ checks_per_tester: 15
 agent_turns: 40           # an agent's turn budget; it then hands the rest to a fresh agent (never ends the pass)
 fixes_per_batch: 20       # fixes are made and verified in batches until all are done
 max_loop_rounds: 3        # loop only: rounds before stepping back
+fix_during_run: serious   # serious (S1-S2) | clear | none: how much a test pass fixes; fix mode fixes the rest
 max_usd_per_run:          # empty = no limit. If set, the run pauses there and resumes next time
 rotation: 10
 replay: off                # on | off
@@ -70,4 +71,4 @@ Open questions about expected results, each linked to its check.
 
 ## Settings the scripts read
 
-`stage`, `autonomy`, `budget`, `modules`, `gates`, `rotation`, `confirm_over_usd`, `parallel_testers`, `checks_per_tester`, `agent_turns`, `fixes_per_batch`, `max_loop_rounds`, `max_usd_per_run`, the `model_*` keys, `replay`, `checkpoint_commit`, `commit_qa`, `evidence`, `bar_fix_now`, `last_full` and `releases_since_full`. Unknown keys are kept and ignored, so the user can add their own notes.
+`stage`, `autonomy`, `budget`, `modules`, `gates`, `rotation`, `confirm_over_usd`, `parallel_testers`, `checks_per_tester`, `agent_turns`, `fixes_per_batch`, `max_loop_rounds`, `fix_during_run`, `max_usd_per_run`, the `model_*` keys, `replay`, `checkpoint_commit`, `commit_qa`, `evidence`, `bar_fix_now`, `last_full` and `releases_since_full`. Unknown keys are kept and ignored, so the user can add their own notes.

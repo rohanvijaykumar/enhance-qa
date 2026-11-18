@@ -2,6 +2,28 @@
 
 ## Unreleased
 
+From the first real-project run: a full pass of a desktop video app took about 6 hours. It filed 45 bugs, 26 of them cosmetic or wishes, and fixed bugs in the middle of testing.
+- **Bugs only** (`policies/signal.md`, "Bugs, not wishes"):
+  - a finding is filed only when it breaks a promise the product makes, or does real harm;
+  - missing features, suggestions, nice-to-haves and QA's own numeric targets are never filed or reported, only counted on the run's Signal line;
+  - the verifier gains a `Not a bug` verdict;
+  - S4 means a small visible defect, not polish.
+- **Full coverage, of what exists:**
+  - the scout covers every function a person can reach;
+  - it never writes checks for features the product doesn't have, or targets it never states;
+  - checks without a stated target record a baseline instead of failing;
+  - a failure against an assumed expectation is a bug only if it also does harm.
+- **Fixing in a pass:** `fix_during_run` (default `serious`) limits a test pass to fixing S1–S2. The rest wait for `fix` or the user's agent; `fix` and `loop` still fix everything eligible.
+- **Pace check:** after the first round of batches, the lead re-estimates from the real pace. If the rest will take more than about 1.5× what was announced, it offers "keep going", "high-risk first" or "stop after this round", and the next run resumes. Kickoffs state honest times for slow apps, with "split".
+- **Speed without testing less:**
+  - checks that share setup run together;
+  - the scout prepares small fixtures in `qa/evidence/fixtures/`;
+  - up to 5 lanes when the machine allows;
+  - verifiers work by area, with one reproduction for deterministic failures;
+  - time-per-check estimates now differ by app type.
+
+## Earlier in this release
+
 - README rewritten: a team diagram in light and dark (drawn by `.github/assets/src/make-visuals.mjs`), a section on the kinds of software it covers, and real install commands.
 - Plugin manifests: homepage, repository and more keywords.
 

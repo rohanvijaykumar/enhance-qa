@@ -59,26 +59,42 @@ Write them in the formats in `references/formats/` (`plan.md`, `notes.md`, `chec
 
 **Notes** (`qa/notes.md`): how to start, log in, reach each area; stable element references; drivers that work here; waits; quirks. Commands and facts, not prose.
 
+**Fixtures** (`qa/evidence/fixtures/`, git-ignored with the rest of the evidence): prepare small sample inputs once, so testers reuse them instead of fetching or generating their own. For example:
+- a few seconds of video in each format the product accepts;
+- a short audio clip;
+- a small document, CSV or image;
+- an empty file, a huge-name file and a broken file.
+
+List them in the notes. Use the smallest input that still exercises the function. Fetch from third-party sites only in checks about fetching, and use the shortest real item there.
+
 **Checklist** (`qa/checklist/<area>.md`):
 1. **Areas** are the parts a user sees (auth, cart, checkout, settings, export…), plus app-wide areas as needed (accessibility, security, performance, release). Each area header lists `Paths` (globs of the code behind it) so diffs map to checks. Every product file that matters should fall under some area's paths.
-2. **Checks** come from the chosen modules' catalogues, adapted to this product: real screen names, labels, data and expected text. Drop seeds that don't apply; add what the product's own docs and claims promise; cover every feature the README or UI mentions.
-3. **Every check has an oracle** in `Source`. If no oracle answers what should happen, write a `Question:` instead of guessing. On Autopilot, write the most conventional expectation and mark it `Assumed: yes`.
-4. **Risk** reflects the impact on users and the likelihood of failure:
+2. **Cover every function that exists,** the way a careful person would try it:
+   - every screen, control, setting, option, command, keyboard shortcut and menu item;
+   - every file the product reads or writes, and every error it can show;
+   - the paths between them.
+
+   Checks come from the chosen modules' catalogues, adapted to this product: real screen names, labels, data and expected text. Drop seeds whose feature doesn't exist. Add what the product's own docs and UI promise; cover every feature the README or UI mentions.
+3. **Test what's there, not what could be.**
+   - Never write a check for a feature the product doesn't have, or an expectation it never makes: no controls you'd expect it to offer, and no memory, speed or size targets of QA's own.
+   - Measurements without a stated target are recorded as baselines, not pass/fail checks (`policies/signal.md`, "Bugs, not wishes").
+4. **Every check has an oracle** in `Source`: the product's own promise (a doc, on-screen text, a setting, its behaviour elsewhere, an earlier build) or a harm rule (a crash, data loss, a security hole, WCAG). If no oracle answers what should happen, write a `Question:` instead of guessing. On Autopilot, write the most conventional expectation and mark it `Assumed: yes`. A failure against an assumed expectation becomes a bug only if it also does real harm; otherwise it's a question for the user.
+5. **Risk** reflects the impact on users and the likelihood of failure:
    - high for core flows, money, data, security and anything the product's claims depend on;
    - raise it one level for areas with escaped bugs.
-5. **Types:**
+6. **Types:**
    - `auto` where a command decides (tests, validators, scanners, status codes);
    - `agent` for driving the product;
    - `human` for judgement (feel, look, sound, wording);
    - `device` for real hardware;
    - `gate` for store or certification steps.
-6. **Tag** the 5–10 checks that prove the product starts and its core flow works `smoke`. Tag safe read-only checks `prod-safe`.
-7. **Add exploratory charters:** one per area, more for high-risk areas.
-8. **Size by stage:**
+7. **Tag** the 5–10 checks that prove the product starts and its core flow works `smoke`. Tag safe read-only checks `prod-safe`.
+8. **Add exploratory charters:** one per area, more for high-risk areas.
+9. **Size by stage:**
    - prototype: smoke, core flows and a few charters (about 20–40 checks);
    - building and later: a full baseline (a small web app has about 60–150 checks, a large one 300–500).
-9. **IDs** come from `qa next-id check <AREA>`. Never renumber. Run `qa validate` when you're done, and fix every error.
-10. **Write one area file at a time,** completely, before starting the next. If you're near your turn budget, finish the current file, then list the areas still to write in your reply; a fresh scout continues from there.
+10. **IDs** come from `qa next-id check <AREA>`. Never renumber. Run `qa validate` when you're done, and fix every error.
+11. **Write one area file at a time,** completely, before starting the next. If you're near your turn budget, finish the current file, then list the areas still to write in your reply; a fresh scout continues from there.
 
 ## Job 3: adding checks for new or changed features
 

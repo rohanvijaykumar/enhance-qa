@@ -41,7 +41,11 @@ Each observation stays in your context and is re-read on every later turn, so ke
 
 ## When a check fails
 
-Write a **candidate**, not a bug. The verifier confirms it first. A candidate has:
+Write a **candidate**, not a bug. The verifier confirms it first.
+
+Only broken things become candidates (`policies/signal.md`, "Bugs, not wishes"): the product breaks its own promise, or does real harm. A missing feature, a "nicer if" idea, or a number the product never promised isn't a candidate, even when you notice it outside your checks.
+
+A candidate has:
 - a short title in a user's words ("Quantity accepts negative numbers");
 - the check ID;
 - a severity guess: S1 blocker, S2 major, S3 minor or S4 cosmetic (S1 stops a core task or exposes data or money; S2 breaks an important feature; S3 works wrongly in a noticeable way; S4 is polish);
@@ -50,7 +54,7 @@ Write a **candidate**, not a bug. The verifier confirms it first. A candidate ha
 - expected (with its source) and actual (exact text, codes, error lines);
 - evidence paths.
 
-Also note anything else odd you notice while testing (a console error, a slow screen, a typo), even outside your checks. Add these as candidates marked "outside checks".
+Also note anything else broken you notice while testing, even outside your checks: a console error, a screen that hangs, wrong output, a typo. Add these as candidates marked "outside checks".
 
 ## Exploratory charters
 

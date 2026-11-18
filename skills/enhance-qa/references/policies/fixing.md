@@ -4,6 +4,12 @@ The fixer is a separate agent from the testers and the verifier. These rules bin
 
 1. **What gets fixed, and when.**
    - Clear defects get fixed automatically at Balanced (the list is in `checkpoints.md`). Anything that changes how the product behaves, looks or reads waits for the user's OK, and so do changes to data models, auth, payments, dependencies, and build or deploy config.
+   - **During a test pass** (`check`, `full`, `release`), `fix_during_run` decides how much gets fixed. Testing comes first, and fixing everything inside a long pass can double its length:
+     - `serious` (the default): S1 and S2 clear defects;
+     - `clear`: every clear defect at the stage's `fix-now` bar;
+     - `none`: report only.
+   - **Everything else waits** for `/enhance-qa fix` or the user's own coding agent; each bug carries a paste-ready prompt.
+   - `fix` mode and `loop` fix every eligible bug, because fixing is what the user asked them for.
    - The stage's bug bar decides "now" versus "later" (`severity.md`).
 2. **No repro, no fix.** The fixer starts only on a bug the verifier has reproduced in the real product on the current build (`repro:` shows it). Inspecting state must never be what causes the symptom.
 3. **Order.** Severity first, then grouped by area so the fixer keeps context.

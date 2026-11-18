@@ -24,8 +24,10 @@ Before I start, here's what I found. Reply "go", or correct any line.
    I can't test: a real iPhone → I'll give you a 3-minute checklist for that
 4. Test accounts: none found. I'll create two (needed to check users can't see
    each other's data). No real emails, payments or customer data, ever.
-5. Fixing: I'll fix clear bugs myself, one commit each, and ask before anything
-   that changes how the app behaves, looks or reads
+5. Fixing: during the pass I'll fix serious bugs (S1–S2) myself, one commit each, and
+   list the rest with a prompt for your coding agent. Say "fix all clear bugs" or
+   "don't fix" to change that. I always ask before anything that changes how the app
+   behaves, looks or reads
 6. Add a short note to CLAUDE.md/AGENTS.md so your coding agent knows about qa/
    and hands QA requests to me, plus the read-only QA role files? (recommended)
 7. Save stable checks as automated tests so later runs cost less? (adds Playwright
@@ -34,6 +36,7 @@ Before I start, here's what I found. Reply "go", or correct any line.
 
 **Lines to add when they apply:**
 - **Budget:** "Budget: standard (~$0.50–2 per everyday check). Say 'lean' or 'thorough' to change."
+- **Long first passes.** Always state the honest size and time of the first full pass, using the per-check times for this kind of app (`policies/cost.md`, "Estimating"). For example: "Testing every function: about 250 checks, roughly 3–4 hours here, because this desktop app processes media. Say 'split' to spread it over several runs, highest risk first."
 - **Live products:** "After-change check: a fast smoke test after each change your coding agent makes? (off by default; costs tokens per change)". On Claude Code, mention that it rides on the project `verify` skill.
 - **Not a git repo:** "This folder isn't a git repo. Run `git init` so every fix can be undone? (recommended)"
 - **Imported checklists:** "Do you have a client or certification checklist to import? (paste it or give me the file)"

@@ -45,7 +45,7 @@ Dimensions: network profile, CPU/device class, data volume, cold vs warm cache, 
 
 ### Budgets and claims
 - [high · agent] Collect every speed or size claim in docs, store listing and UI copy ("loads in under 2 seconds", "instant search", "under 10 MB") → each becomes a numbered budget and is measured {smoke}
-- [medium · agent] No claims found → adopt defaults: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1 (Core Web Vitals "good", 75th percentile), and record them as assumed budgets
+- [medium · agent] No claims found → measure against the defaults (LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1, Core Web Vitals "good" at the 75th percentile) and record the numbers. A miss against a default isn't a bug by itself; file only clear harm: a freeze, a hang, input lag a user notices, memory that keeps growing (`policies/signal.md`)
 - [medium · auto] Compare against the previous build's numbers if they exist → no regression beyond 10% (or the project's own threshold) without a note
 
 ### Startup and load time
@@ -122,7 +122,7 @@ Dimensions: network profile, CPU/device class, data volume, cold vs warm cache, 
 - [human] Use the product on a real mid-range phone over a throttled or poor connection for the top task → does it feel fast enough that you wouldn't give up?
 - [human] Leave the product open all day or overnight on a real device → still responsive, not hot, battery drain reasonable.
 - [human] Judge animation smoothness and scrolling feel on real hardware → smooth to the eye.
-- [human] Decide whether a number that misses a default budget is acceptable for this product → accept or file.
+- [human] Numbers that miss a default budget are listed in the run file as measurements, not bugs. Review them if speed matters for this product → accept, or tell QA the budget to hold the product to.
 
 ## Known pitfalls
 

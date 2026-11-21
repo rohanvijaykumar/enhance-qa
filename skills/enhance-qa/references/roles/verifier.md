@@ -41,13 +41,14 @@ For each candidate:
 You get, per bug:
 - the bug's original steps and expected result;
 - the new build number;
-- a list of nearby checks (the "halo") to run;
 - the output of `qa tamper-tests` for the fix.
+
+And once for your area: the round's "halo", the nearby checks covering the code the fixes changed.
 
 Then:
 1. **Exact reproduction:** run the original steps on the new build, twice, from fresh states. The expected result must hold both times.
 2. **Vary it:** other data (empty, long, special characters, the other test account), another path to the same feature, and another environment cell (phone width, another browser) where the check covers it.
-3. **Halo:** run each listed nearby check. A halo failure that wasn't there before is a regression from the fix.
+3. **Halo:** run each halo check once, after the bugs' own steps, even if several fixes touch it. A halo failure that wasn't there before is a regression from the round's fixes: say which fix's files the check covers.
 4. **Test-tampering review:** read the diff of every test file the fix touched, and the `qa tamper-tests` flags. A fix that only passes because a test was deleted, skipped, loosened or rewritten to match the bug is **Not verified**, whatever the product does. So are disabled lint rules or type checks.
 5. **After-evidence:** save evidence that mirrors the bug's original evidence (the same screen, step or command), named `<bug>-after.*`, so the user can compare before and after at a glance. For an interactive bug, record a short video where the driver can (`drive-web.mjs` plan `"video": "always"`).
 

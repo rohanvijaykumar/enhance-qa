@@ -153,7 +153,7 @@ def pad3(n):
 
 # ---------------------------------------------------------------- args
 
-FLAGS = {"json", "write", "record", "verify", "show", "force", "revert", "quick", "check", "done", "keep", "all"}
+FLAGS = {"json", "write", "record", "verify", "show", "force", "revert", "quick", "halo", "check", "done", "keep", "all"}
 
 
 def parse_args(argv):
@@ -1460,6 +1460,7 @@ def select(ctx, opts):
     budget = opts.get("budget") or setting(plan, "budget", "standard")
     stage = setting(plan, "stage", "building")
     quick = bool(opts.get("quick"))
+    halo = bool(opts.get("halo"))
     head = reg[-1] if reg else None
     tested = [b for b in tested_builds(ctx, runs) if not head or b != head["build"]]
     base_n = to_int(opts.get("base"), tested[-1] if tested else None)
@@ -1491,12 +1492,12 @@ def select(ctx, opts):
             selected[c["id"]].append(reason)
 
     for c in checks:
-        if "smoke" in tags_of(c):
+        if "smoke" in tags_of(c) and not halo:
             pick(c, "smoke")
     bugs = load_bugs(ctx)
     to_verify = [b["fm"].get("id") for b in bugs if b["fm"].get("status") == "fixed"]
     for b in bugs:
-        if b["fm"].get("status") != "fixed":
+        if b["fm"].get("status") != "fixed" or halo:
             continue
         bid = b["fm"].get("id", "")
         refs = set(ANY_ID_RE.findall(str(b["fm"].get("found", "")) + " " + str(b["fm"].get("check", ""))))
@@ -1513,7 +1514,7 @@ def select(ctx, opts):
     rotation_pct = to_int(setting(plan, "rotation", DEFAULT_ROTATION.get(stage, 10)), 10)
     if budget == "thorough":
         rotation_pct = max(rotation_pct, 25)
-    if budget == "lean" or quick or not base:
+    if budget == "lean" or quick or halo or not base:
         rotation_pct = 0
     pool = [c for c in checks if c["fields"].get("Type", "").lower() in ("agent", "auto")]
     last = latest_results(runs)
@@ -1523,9 +1524,17 @@ def select(ctx, opts):
     for c in candidates[:rot_n]:
         pick(c, "rotation")
     order = {"high": 0, "medium": 1, "low": 2}
-    ids = sorted(selected, key=lambda i: (0 if "smoke" in selected[i] else 1, order.get(by_id[i]["fields"].get("Risk", "").lower(), 3), i))
+
+    def rank_key(i):
+        risk = order.get(by_id[i]["fields"].get("Risk", "").lower(), 3)
+        if halo and "regression" in tags_of(by_id[i]):
+            risk = 0
+        return (0 if "smoke" in selected[i] else 1, risk, i)
+    ids = sorted(selected, key=rank_key)
     if quick:
         ids = ids[:10]
+    if halo:
+        ids = ids[:max(1, to_int(opts.get("max"), 10))]
     wide_reasons = []
     total_files = tracked_count(ctx)
     if base and total_files and len(changed) >= 10 and len(changed) / float(total_files) > 0.3:
@@ -1541,7 +1550,7 @@ def select(ctx, opts):
     testers = max(1, to_int(setting(plan, "parallel_testers", 3), 3))
     est_usd = round(agent_n * per * OVERHEAD, 2)
     est_min = int(math.ceil(agent_n * 1.5 / testers)) + 2 if agent_n else 1
-    res = {"base": base_n, "head": head["build"] if head else None, "no_baseline": base is None,
+    res = {"base": base_n, "head": head["build"] if head else None, "no_baseline": base is None, "halo": halo,
            "changed": changed, "areas": affected, "docs_changed": docs, "unmapped": unmapped,
            "to_verify": to_verify, "selected": [{"id": i, "area": by_id[i]["area"], "risk": by_id[i]["fields"].get("Risk", "").lower(),
                                                  "type": by_id[i]["fields"].get("Type", "").lower(), "reasons": selected[i]} for i in ids],
@@ -1562,7 +1571,7 @@ def cmd_select(ctx, pos, opts):
     else:
         lines.append("Build %s → %s: %d file(s) changed in %d area(s)%s" % (
             r["base"], r["head"], len(r["changed"]), len(r["areas"]), (" · unmapped: " + ", ".join(r["unmapped"][:6])) if r["unmapped"] else ""))
-    lines.append("Selected %d checks (%d agent, %d auto) · ~$%.2f · ~%d min" % (
+    lines.append((("Halo: %d checks" if r["halo"] else "Selected %d checks") + " (%d agent, %d auto) · ~$%.2f · ~%d min") % (
         len(r["selected"]), r["estimate"]["agent_checks"], r["estimate"]["auto_checks"], r["estimate"]["usd"], r["estimate"]["minutes"]))
     for s in r["selected"]:
         lines.append("  %s  %s · %s · %s" % (s["id"], s["risk"], s["type"], ", ".join(s["reasons"])))
@@ -2430,6 +2439,7 @@ HELP = """enhance-qa helper %s. Run from the project root.
   tamper --role ROLE [--since TREE]       files changed outside a role's allowed paths
   tamper-tests --since BUILD|REF          flags weakened, skipped or deleted tests
   select [--base N] [--quick] [--budget P] [--json]   impact-based scope and estimate
+  select --halo [--base N] [--max N]      checks around the code changed since build N, for verifying fixes
   coverage [--json]                       regenerate qa/coverage.md
   run new --mode MODE [--budget P]        create the next run file
   results merge RUN                       merge role notes' results into the run file

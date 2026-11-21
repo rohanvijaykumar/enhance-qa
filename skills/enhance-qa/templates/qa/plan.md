@@ -17,7 +17,7 @@ confirm_over_usd: 2       # estimates above this ask for a one-line OK first; "n
 parallel_testers: 3
 checks_per_tester: 15
 agent_turns: 40           # an agent's turn budget; it then hands the rest to a fresh agent (never ends the pass)
-fixes_per_batch: 20       # fixes are made and verified in batches until all are done
+fixes_per_batch: 20       # the most bugs one fix round takes: one build, one verification
 max_loop_rounds: 3        # loop only: rounds before stepping back
 fix_during_run: serious   # serious (S1-S2) | clear | none: how much a test pass fixes; fix mode fixes the rest
 max_usd_per_run:          # empty = no limit. If set, the run pauses there and resumes next time

@@ -55,10 +55,11 @@ Never include the tester's guess at the cause, or the tester's "Actual" beyond w
 ```
 <contents of references/roles/verifier.md>
 ---
-Job 2: verify fixes. New build: 13. Run: 7. Notes: qa/runs/007/verifier-2.md
-For each bug: the original Steps and Expected, the halo checks' full text, and the qa tamper-tests output for its commit.
+Job 2: verify fixes. New build: 13. Run: 7. Area: cart. Lane: 2. Notes: qa/runs/007/verifier-2.md
+For each bug: the original Steps and Expected, and the qa tamper-tests output for its commit.
+Halo for this area, each run once: the full text of the checks qa select --halo listed, plus any a fixer named.
 ```
-Use a verifier that didn't reproduce these bugs, when a fresh one is available.
+One verifier per area, in parallel on their own lanes. Use verifiers that didn't reproduce these bugs, when fresh ones are available.
 
 **Fixer brief:**
 ```

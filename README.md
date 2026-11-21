@@ -227,9 +227,11 @@ Subscribers pay in usage limits instead, and the same levers apply.
 **Faster without testing less:**
 - checks that share setup run together;
 - small prepared sample files replace live downloads;
-- up to 5 testers run at once when your machine can take it;
+- up to 5 testers run at once when your machine can take it, even for apps that allow only one copy: each copy gets its own identity, without touching your files;
 - verifiers work by area;
-- only serious bugs are fixed mid-pass.
+- only serious bugs are fixed mid-pass;
+- a fix round takes everything you approved at once, with one build and one verification that re-checks only what the fixes touched;
+- minor bugs left after a long pass go to your own coding agent if you like, and the next check verifies them.
 
 **A pass that starts, finishes.** Nothing cuts a run short behind your back:
 - an agent that uses up its turn budget hands its remaining checks to a fresh agent;

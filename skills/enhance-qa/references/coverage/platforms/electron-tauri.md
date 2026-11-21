@@ -32,6 +32,26 @@ Covers desktop apps whose interface is web content in a shell: Electron (bundled
 
 **Can't be driven here:** the system tray, native menus on macOS, notification centre, OS file dialogs, protocol-handler registration by the browser, code signing with real certificates, and Gatekeeper or SmartScreen first-run prompts. Tauri on macOS and Linux needs those OSes. Each becomes a human or device check; certificates and notarisation credentials are never handled by an agent.
 
+## Parallel lanes
+
+Most Tauri apps use the single-instance plugin and keep their data under the app ID, so a second copy only focuses the first. Electron apps that call `requestSingleInstanceLock` do the same. Don't test them on one lane: give each lane its own identity. The general rules are in `../../platforms/drivers.md`, "Several copies at once"; for these apps:
+
+- **Tauri: a lane build per extra lane, with its own app ID.** Tauri merges `--config` (a JSON string or a JSON file) over `tauri.conf.json` at build time, so the config file stays untouched [10]:
+  ```
+  CARGO_TARGET_DIR=qa/.state/lanes/target npx tauri build --no-bundle --config qa/.state/lanes/lane2.json
+  ```
+  with `lane2.json` holding `{"identifier": "com.example.app.qa2"}` (Tauri 2; on Tauri 1 the key is `tauri.bundle.identifier`). On Windows PowerShell, set `$env:CARGO_TARGET_DIR` first.
+  - The separate target folder keeps the product's own build as it was. Dependencies compile once there, so each later lane build only recompiles the app.
+  - Copy each lane's program into `qa/.state/lanes/<n>/` before the next lane build overwrites it, together with what the build put beside it: sidecar binaries (`bundle.externalBin`) and resource folders (`bundle.resources`).
+  - The new ID gives the lane its own single-instance lock, its own data folders (`%APPDATA%\<id>` and `%LOCALAPPDATA%\<id>` on Windows, `~/Library/Application Support/<id>` on macOS, `~/.local/share/<id>` and `~/.config/<id>` on Linux) and, on Windows, its own WebView2 profile. Resetting a lane means quitting it and deleting its folders.
+- **Electron: a user data folder per lane.** Electron counts a copy as a second instance only when it shares the user data folder (`app.getPath('userData')`) with the first [11], and that folder also holds the settings, so a lane needs its own. Ways to get one, in order:
+  - the app's own profile or data-folder option;
+  - Chromium's `--user-data-dir=<lane folder>` switch (with Playwright, in `_electron.launch`'s `args`). Electron doesn't document it, so prove it took effect;
+  - `XDG_CONFIG_HOME` per lane on Linux, where Electron puts its app data;
+  - a lane build with a different app name, overridden on the build command line (electron-builder's `-c.extraMetadata.*`), because the folder is named after the app.
+- **Ports per lane:** `tauri-driver --port <p> --native-port <p+1>`; for the Chrome DevTools Protocol, `--remote-debugging-port=<9222+n>` for Electron, or the environment variable `WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS=--remote-debugging-port=<9222+n>` for Tauri on Windows. Start lanes one at a time and wait until each answers on its port: starting two at once has lost a port.
+- **Lane 1 keeps the real app ID** for notifications (Windows ties them to the installed app), deep links, file associations, single-instance checks, the updater and installers.
+
 ## Default matrix
 
 | Tier | Cells |
@@ -152,3 +172,5 @@ Dimensions: OS and version; architecture (x64, arm64); packaged vs dev; signed v
 7. [Tauri: Updater plugin](https://v2.tauri.app/plugin/updater/) — signed updates required, signature verification (checked 2026-11-16)
 8. [Electron: Deep links](https://www.electronjs.org/docs/latest/tutorial/launch-app-from-url-in-another-app) — protocol handlers and launching from a URL (checked 2026-11-16)
 9. [Tauri: Single instance plugin](https://v2.tauri.app/plugin/single-instance/) — one running instance and argument forwarding (checked 2026-11-16)
+10. [Tauri: Command line interface](https://v2.tauri.app/reference/cli/) — `tauri build --config` merges JSON, JSON5 or TOML (strings or files) over the config file; `--no-bundle` skips the installers (checked 2026-11-20)
+11. [Electron: app](https://www.electronjs.org/docs/latest/api/app) — a second instance is one that shares the user data folder (and on Windows the program name); default data folders per OS (checked 2026-11-20)

@@ -7,7 +7,7 @@
 Repeat until a stop condition holds:
 1. **`check`** over what changed since the last round, plus any areas that had bugs last round. The first round uses the normal `check` scope.
 2. **`fix`** the `fix-now` clear defects, plus anything the user approved.
-3. **Verify** the fixes on the new build.
+3. **Verify** the fixes on the new build: one build per round, verifiers by area, and the round's halo (`policies/fixing.md`, "Fix rounds").
 4. **Re-check the exit criteria** (`policies/stages.md`; the plan's `exit_criteria:`).
 
 ## Stop when

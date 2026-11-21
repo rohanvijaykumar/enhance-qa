@@ -78,11 +78,11 @@ In `qa/plan.md`. None of these ends a pass early, except `max_usd_per_run` when 
 | Setting | Default | Meaning |
 |---|---|---|
 | `confirm_over_usd` | 2 | Estimates above this ask for a one-line OK before starting (Balanced, Guided). `never` turns it off |
-| `parallel_testers` | 3 | Testers working at the same time, one lane and one copy of the app each. The lead may go up to 5 when the machine has the memory and CPU for more copies: check free memory before starting each extra one. More is faster, but uses usage limits faster |
+| `parallel_testers` | 3 | Testers working at the same time, one lane and one copy of the app each. The lead may go up to 5 when the machine has the memory and CPU for more copies: check free memory before starting each extra one. More is faster, but uses usage limits faster. Apps that allow only one copy get lane copies with their own identity (`platforms/drivers.md`, "Several copies at once") |
 | `fix_during_run` | `serious` | How much a test pass fixes: `serious` (S1–S2), `clear` (every clear defect at the stage's bar) or `none`. `fix` and `loop` fix everything eligible (`fixing.md`) |
 | `checks_per_tester` | 15 | Batch size. Smaller batches mean smaller, cheaper contexts |
 | `agent_turns` | 40 | Turns per tester or verifier before it writes its notes and hands its remaining work to a fresh agent. Fixers get twice this and the scout three times, because their jobs are longer. Never ends the pass |
-| `fixes_per_batch` | 20 | Fixes are made in batches of this size, each batch verified before the next, until every eligible bug is done |
+| `fixes_per_batch` | 20 | The most bugs one fix round takes: one build, one verification (`fixing.md`, "Fix rounds"). A longer list is split into batches, each verified before the next, until every eligible bug is done |
 | `max_loop_rounds` | 3 | For `loop` only. After this many rounds the loop steps back and reports what's left, instead of re-finding old problems (`modes/loop.md`) |
 | `max_usd_per_run` | (empty: no limit) | **Opt-in hard limit.** When set and reached, the lead finishes the current check, saves the run as `interrupted`, and the next `/enhance-qa` resumes exactly where it stopped. Where the platform supports a budget flag (`claude -p --max-budget-usd`), use it with the same value |
 
@@ -143,10 +143,12 @@ These protect the user's code and stop one activity, never the pass:
 ## Speed
 
 - Testers work in parallel (`parallel_testers`, default 3, up to 5 when the machine allows).
+- **Apps that allow only one copy still run in parallel.** Each lane gets a copy with its own identity: its own profile folder, or a lane build with its own app ID, made without touching the product's files (`platforms/drivers.md`, "Several copies at once"). Building lanes takes minutes; a real desktop pass that fell back to one lane took almost 7 hours.
 - **Checks that share setup run together,** in an order where each starts from the state the last one left. Setting up once per batch, not once per check, is the biggest saving on slow apps.
 - **Prepared fixtures** (`qa/evidence/fixtures/`) replace live downloads and generated inputs: a few seconds of media instead of a full video.
 - **Verifiers work by area, in parallel.** Deterministic failures need one clean reproduction, not three.
 - **Fixing waits** in a test pass except for serious bugs (`fix_during_run`), so testing isn't held up by fix-and-verify rounds.
+- **Fix rounds stay few and lean:** everything approved in one round, one build, verifiers by area in parallel, and a halo limited to the code the fixes changed (`qa select --halo`). Minor bugs left after a long pass are suggested for the user's own coding agent, verified by the next `check` (`fixing.md`, "Fix rounds").
 - The smoke test runs first, so a broken build fails in about a minute.
 - A typical `check` should finish in under 10 minutes.
 - Long passes run in their own session, beside the user's work (`references/platforms/`).

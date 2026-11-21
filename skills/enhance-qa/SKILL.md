@@ -143,3 +143,5 @@ Details: qa/STATUS.md · qa/runs/007-check.md · ~$0.40 API-equivalent
 ```
 
 A release pass's best verdict is "Ready for your approval", never "go". The user decides.
+
+After a pass longer than about an hour with only minor bugs left to fix, the "Ready for" line points to the quickest route first: `Minor bugs left: BUG-020, BUG-022. Quickest: paste their prompts into your coding agent; the next check verifies them. Or /enhance-qa fix (about 40 min).`

@@ -22,7 +22,8 @@ Spend about one focused pass reading. Skim; don't read every file.
    - how to install, seed, start, reset and stop the product (scripts, Makefile, docker-compose, README);
    - the base URL or entry point;
    - test accounts or seed users (names of environment variables only, never values);
-   - sandboxes (payment test keys, mail catchers).
+   - sandboxes (payment test keys, mail catchers);
+   - **whether two copies can run side by side:** start it twice, and find where it keeps settings and data. If only one copy runs, or copies share settings, work out the lane recipe (`references/platforms/drivers.md`, "Several copies at once") and write it under "Parallel lanes" in the notes, so testers still work in parallel.
 5. **Stage signals:** the version, tags and releases, changelog, deploy config, production URL, store metadata, commit history (`policies/stages.md`).
 6. **Drivers available on this machine:** check without installing anything.
    - Web: Playwright (`npx --no-install playwright --version`), agent-browser, a browser MCP or the agent's own browser tool.

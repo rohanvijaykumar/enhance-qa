@@ -22,6 +22,11 @@ The scout writes it during setup. The lead merges what testers learn (their "Lea
 - Web: Playwright (Chromium, Firefox, WebKit installed) · `npx playwright test tests/qa`
 - No device or emulator on this machine
 
+## Parallel lanes
+- Copies run side by side: each lane gets its own browser context and its own test user (C, D, E for lanes 3–5), because carts are stored per user on the server
+- Lane 1 only: checks that send email (one shared mail catcher inbox)
+- (For an app that allows one copy: the lane recipe, each lane's program, data folder and ports, how to reset a lane, and what stays on lane 1. See `platforms/drivers.md`, "Several copies at once")
+
 ## App map
 | Area | Where | How to reach | Key elements |
 |---|---|---|---|
@@ -44,4 +49,4 @@ The scout writes it during setup. The lead merges what testers learn (their "Lea
 - **Never put real credentials here.** Name environment variables or seed files instead.
 - **Stable element references** (labels, roles, test IDs) save turns. Prefer them over CSS chains.
 - **Mark anything unverified** with "(unverified)".
-- **Testers read only** "How to start", "How to log in", "Drivers that work here", their area's row of the app map, "Waits and timing" and "Don't report".
+- **Testers read only** "How to start", "How to log in", "Drivers that work here", their own lane's lines from "Parallel lanes", their area's row of the app map, "Waits and timing" and "Don't report".

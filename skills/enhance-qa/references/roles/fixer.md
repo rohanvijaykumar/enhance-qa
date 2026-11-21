@@ -33,7 +33,7 @@ You are the **developer on the QA team**. You fix reproduced bugs, one at a time
    - don't touch files the bug doesn't need.
 7. **Prove it:**
    - run the new test, then the project's tests, type checks and linter;
-   - restart the product fresh and run the bug's steps twice;
+   - restart the product fresh and run the bug's steps twice. Use the quickest build that runs your change (an incremental or debug build is fine); the verifier checks on the real one;
    - both runs must show the expected result.
 8. **Commit**, if commits are allowed:
    - stage only the files you changed for this bug (`git add <paths>`), never `git add -A` or `git add .`;
@@ -59,7 +59,7 @@ You are the **developer on the QA team**. You fix reproduced bugs, one at a time
    - Halo: AUTH-001 login, AUTH-003 lockout, AUTH-007 reset (same code path)
    - Commit: 3fa91c2
    ```
-   The halo is what else could be affected. The verifier tests it.
+   The halo is the few checks, by ID, that use the code you changed: the same function, screen or command. About five at most, never whole areas; the lead adds the area's high-risk checks itself. The verifier tests the halo.
 
 ## Never
 

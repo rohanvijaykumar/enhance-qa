@@ -45,6 +45,7 @@ The shared process the lead follows in every mode. Each mode file says which pha
   - about `checks_per_tester` checks per batch (default 15);
   - **group checks that share setup** (the same screen, input file, account or settings) and order them so each starts from the state the last one left, where the checks allow it. Setting up once per batch instead of once per check is the biggest time saver on slow apps;
   - `parallel_testers` batches at a time, one lane each, with the next batch starting as soon as one finishes, until every batch is done. Use more lanes when the machine can run another copy of the app (`policies/cost.md`);
+  - **an app that allows only one copy still gets lanes:** lane copies with their own identity, built without touching the product's files (`platforms/drivers.md`, "Several copies at once"). Checks that need the real identity or machine-wide things (the clipboard, notifications, deep links) go in lane 1's batches;
   - scripted and one-screen checks go to the fast tier; multi-step flows and charters to the balanced tier;
   - testers use the prepared fixtures (`qa/evidence/fixtures/`, listed in the notes) instead of fetching or generating their own inputs.
 
@@ -102,7 +103,7 @@ The shared process the lead follows in every mode. Each mode file says which pha
 - **The fix list:**
   - `fix-now` bugs that are clear defects, or that the user approved;
   - severity first, then grouped by area;
-  - worked in batches of `fixes_per_batch` (default 20), each batch verified before the next, until the list is done.
+  - fixed in one round: fix the whole list, build once, verify once (`policies/fixing.md`, "Fix rounds"). Only a list longer than `fixes_per_batch` (default 20) is split, each batch verified before the next.
 
 ## 6. Fix
 
@@ -110,9 +111,9 @@ Only in modes that fix (`fix`, `loop`, `check` or `full` when autonomy allows, o
 
 In a test pass, `fix_during_run` limits this phase: by default only S1–S2 clear defects. The rest are listed, each with its prompt, for `/enhance-qa fix` or the user's own agent. The summary says so ("Fixed: 3 serious bugs. 14 more are ready to fix: `/enhance-qa fix`").
 
-1. **Checkpoint commit question:** asked once, then remembered as `checkpoint_commit:`.
+1. **Checkpoint commit question:** asked once, then remembered as `checkpoint_commit:`. Ask any open "Needs you" questions about bugs on the fix list at the same time, so the whole list goes in one round.
 2. `qa phase start --role fixer`.
-3. **Spawn the fixer** (`roles/fixer.md`) with the bug files, in order. The fixer commits one bug at a time and writes its fix notes.
+3. **Spawn the fixer** (`roles/fixer.md`) with the whole fix list, in order. The fixer commits one bug at a time and writes its fix notes.
    - Clear one-file defects go to a balanced-tier fixer, batched by area.
    - Security, auth, data and payment bugs, multi-file fixes and second attempts go to a strong-tier fixer.
 4. `qa gate --role fixer` fails on any edit to the checklist, the plan or other bugs' fields.
@@ -122,18 +123,19 @@ In a test pass, `fix_during_run` limits this phase: by default only S1–S2 clea
 
 ## 7. Verify fixes
 
-1. `qa snapshot` gives the new build that includes the fixes.
-2. `qa phase start --role verifier`.
-3. **Spawn a fresh verifier,** never the one that reproduced these bugs if a fresh one is available. For each fixed bug it gets:
-   - the original steps and expected result;
-   - the fix's "halo" from the fix notes, as checks to run;
-   - `qa tamper-tests --since <old build>` output to review.
-4. `qa gate --role verifier`.
-5. **Copy each log line** into its bug: `qa bug log <BUG> --from qa/runs/<run>/verifier-<k>.md`.
-6. **Verdicts:**
+1. `qa snapshot` gives one new build with every fix in the round. Run the intake gate on it once.
+2. **The round's halo:** `qa select --halo --base <old build> --json` lists the checks around the code the fixes changed (high-risk and regression checks first, 10 at most; `--max N` when the round touched many areas). Add any check a fixer named as using the same code. Each halo check runs once for the round, in the batch of the area it belongs to.
+3. `qa phase start --role verifier`.
+4. **Spawn fresh verifiers, one per area, in parallel,** each on its own lane, never the one that reproduced these bugs if a fresh one is available. Each gets:
+   - for each fixed bug in its area: the original steps and expected result, and `qa tamper-tests --since <old build>` output to review;
+   - its area's halo checks, as their full text.
+5. `qa gate --role verifier`.
+6. **Copy each log line** into its bug: `qa bug log <BUG> --from qa/runs/<run>/verifier-<k>.md`.
+7. **Verdicts:**
    - **Verified:** `verified` and `verified_in`. Then add a regression check to the checklist (`Tags: regression`, `Source: BUG-NNN`, `qa next-id check <AREA>`).
    - **Not verified:** `reopened` and `attempts` + 1. At 2 attempts, `needs-decision`.
    - **Inconclusive:** re-run once. Then `needs-decision`.
+8. **One follow-up round, if needed:** the reopened bugs go back to phase 6 together for their second attempt, then one more build, and phase 7 for just those bugs and their own halo. No third round.
 
 ## 8. Report
 
@@ -148,6 +150,7 @@ In a test pass, `fix_during_run` limits this phase: by default only S1–S2 clea
 6. **Stop anything you started:** dev servers, emulators, browsers, background watchers. Leave alone anything that was already running when the run began.
 7. `qa phase end`, then `qa lock release`.
 8. **Give the user the summary block** (SKILL.md). It names only new bugs at S3 or above, the verdict, the needs-you items, and the paths. Bugs tagged `pre-existing` go on their own line ("Also found, already there before this change: …"), not under "New".
+   - **After a pass longer than about an hour, with only minor bugs (S3–S4) left to fix,** suggest the quickest route: paste their prompts into the user's own coding agent, and the next `check` verifies them all at once. Offer `/enhance-qa fix` as well, with an honest time estimate (`policies/fixing.md`, "Fix rounds").
 
 ## Finishing what was started
 

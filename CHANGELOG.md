@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+From the second real-project run: the new rules cut the noise (25 bugs, 4 cosmetic, 10 non-bugs dropped), but the app allows only one copy, so the pass ran on one lane for almost 7 hours, and three fix rounds took about an hour each.
+- **Parallel lanes for apps that allow only one copy** (`platforms/drivers.md`, "Several copies at once"; `coverage/platforms/electron-tauri.md`, "Parallel lanes"):
+  - each lane gets its own identity: the app's own profile option, a user data folder per copy for Electron, or a lane build with its own app ID for Tauri (`tauri build --config`, so `tauri.conf.json` stays untouched);
+  - never by editing the product's files; lane builds use their own output folder;
+  - proven once with two lanes before fanning out;
+  - the clipboard, notifications, deep links and other machine-wide or identity checks stay on lane 1;
+  - lane builds and data folders are cleaned up at the end; the recipe stays in `qa/notes.md`.
+- **Cheaper fix rounds** (`policies/fixing.md`, "Fix rounds"):
+  - everything approved goes in one round: open questions about those bugs are asked first;
+  - one build, the intake gate once, then verifiers by area in parallel;
+  - the halo covers only the code the fixes changed, each check once per round;
+  - the fixer's own checks may use the quickest build that runs the change;
+  - reopened bugs share one follow-up round, never a third;
+  - after a long pass, minor bugs left are suggested for the user's own coding agent, verified by the next `check`.
+- **`qa select --halo [--base N] [--max N]`:** the checks around the code changed since build N, high-risk and regression checks first, 10 at most, with no smoke or rotation. Both script versions; covered by the parity test.
+
 From the first real-project run: a full pass of a desktop video app took about 6 hours. It filed 45 bugs, 26 of them cosmetic or wishes, and fixed bugs in the middle of testing.
 - **Bugs only** (`policies/signal.md`, "Bugs, not wishes"):
   - a finding is filed only when it breaks a promise the product makes, or does real harm;

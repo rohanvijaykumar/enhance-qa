@@ -380,7 +380,7 @@ function sortedStrs(arr) { return arr.slice().sort(); }
 
 // ---------------------------------------------------------------- args
 
-const FLAGS = new Set(["json", "write", "record", "verify", "show", "force", "revert", "quick", "check", "done", "keep", "all"]);
+const FLAGS = new Set(["json", "write", "record", "verify", "show", "force", "revert", "quick", "halo", "check", "done", "keep", "all"]);
 
 function parseArgs(argv) {
   const pos = [];
@@ -1805,6 +1805,7 @@ function select(ctx, opts) {
   const budget = truthy(opts.budget) ? opts.budget : setting(plan, "budget", "standard");
   const stage = setting(plan, "stage", "building");
   const quick = !!opts.quick;
+  const halo = !!opts.halo;
   const head = reg.length ? reg[reg.length - 1] : null;
   const tested = testedBuilds(ctx, runs).filter((b) => !head || b !== head.build);
   const baseN = toInt(opts.base, tested.length ? tested[tested.length - 1] : null);
@@ -1835,12 +1836,12 @@ function select(ctx, opts) {
   };
 
   for (const c of checks) {
-    if (tagsOf(c).includes("smoke")) pick(c, "smoke");
+    if (tagsOf(c).includes("smoke") && !halo) pick(c, "smoke");
   }
   const bugs = loadBugs(ctx);
   const toVerify = bugs.filter((b) => b.fm.status === "fixed").map((b) => (b.fm.id !== undefined ? b.fm.id : null));
   for (const b of bugs) {
-    if (b.fm.status !== "fixed") continue;
+    if (b.fm.status !== "fixed" || halo) continue;
     const bid = b.fm.id !== undefined ? b.fm.id : "";
     const refs = new Set(Array.from((pystr(b.fm.found !== undefined ? b.fm.found : "") + " " + pystr(b.fm.check !== undefined ? b.fm.check : "")).matchAll(new RegExp(ANY_ID_SRC, "g")), (m) => m[1]));
     for (const c of checks) {
@@ -1857,7 +1858,7 @@ function select(ctx, opts) {
     ["human", "device", "gate"].includes((c.fields.Type || "").toLowerCase())).map((c) => c.id);
   let rotationPct = toInt(setting(plan, "rotation", Object.prototype.hasOwnProperty.call(DEFAULT_ROTATION, stage) ? DEFAULT_ROTATION[stage] : 10), 10);
   if (budget === "thorough") rotationPct = Math.max(rotationPct, 25);
-  if (budget === "lean" || quick || !base) rotationPct = 0;
+  if (budget === "lean" || quick || halo || !base) rotationPct = 0;
   const pool = checks.filter((c) => ["agent", "auto"].includes((c.fields.Type || "").toLowerCase()));
   const last = latestResults(runs);
   const rotN = rotationPct ? Math.ceil(pool.length * rotationPct / 100.0) : 0;
@@ -1865,10 +1866,14 @@ function select(ctx, opts) {
     .sort((x, y) => cmpTuple([(last[x.id] || {}).run || 0, x.id], [(last[y.id] || {}).run || 0, y.id]));
   for (const c of candidates.slice(0, rotN)) pick(c, "rotation");
   const order = { high: 0, medium: 1, low: 2 };
-  const key = (i) => [selected[i].includes("smoke") ? 0 : 1,
-    Object.prototype.hasOwnProperty.call(order, (byId[i].fields.Risk || "").toLowerCase()) ? order[(byId[i].fields.Risk || "").toLowerCase()] : 3, i];
+  const key = (i) => {
+    let risk = Object.prototype.hasOwnProperty.call(order, (byId[i].fields.Risk || "").toLowerCase()) ? order[(byId[i].fields.Risk || "").toLowerCase()] : 3;
+    if (halo && tagsOf(byId[i]).includes("regression")) risk = 0;
+    return [selected[i].includes("smoke") ? 0 : 1, risk, i];
+  };
   let ids = selOrder.slice().sort((x, y) => cmpTuple(key(x), key(y)));
   if (quick) ids = ids.slice(0, 10);
+  if (halo) ids = ids.slice(0, Math.max(1, toInt(opts.max, 10)));
   const wideReasons = [];
   const totalFiles = trackedCount(ctx);
   if (base && totalFiles && changed.length >= 10 && changed.length / totalFiles > 0.3) {
@@ -1884,7 +1889,7 @@ function select(ctx, opts) {
   const estUsd = round2(agentN * per * OVERHEAD);
   const estMin = agentN ? Math.ceil(agentN * 1.5 / testers) + 2 : 1;
   return {
-    base: baseN, head: head ? head.build : null, no_baseline: base === null,
+    base: baseN, head: head ? head.build : null, no_baseline: base === null, halo,
     changed, areas: affected, docs_changed: docs, unmapped,
     to_verify: toVerify, selected: ids.map((i) => ({
       id: i, area: byId[i].area, risk: (byId[i].fields.Risk || "").toLowerCase(),
@@ -1908,7 +1913,7 @@ function cmdSelect(ctx, pos, opts) {
     lines.push("Build " + S(r.base) + " → " + S(r.head) + ": " + r.changed.length + " file(s) changed in " + Object.keys(r.areas).length + " area(s)" +
       (r.unmapped.length ? " · unmapped: " + r.unmapped.slice(0, 6).join(", ") : ""));
   }
-  lines.push("Selected " + r.selected.length + " checks (" + r.estimate.agent_checks + " agent, " + r.estimate.auto_checks + " auto) · ~$" +
+  lines.push((r.halo ? "Halo: " : "Selected ") + r.selected.length + " checks (" + r.estimate.agent_checks + " agent, " + r.estimate.auto_checks + " auto) · ~$" +
     fmt2(r.estimate.usd.v) + " · ~" + r.estimate.minutes + " min");
   for (const s of r.selected) lines.push("  " + s.id + "  " + s.risk + " · " + s.type + " · " + s.reasons.join(", "));
   if (r.to_verify.length) lines.push("Fixes to verify: " + r.to_verify.map((x) => S(x)).join(", "));
@@ -2820,6 +2825,7 @@ const HELP = `enhance-qa helper ${VERSION}. Run from the project root.
   tamper --role ROLE [--since TREE]       files changed outside a role's allowed paths
   tamper-tests --since BUILD|REF          flags weakened, skipped or deleted tests
   select [--base N] [--quick] [--budget P] [--json]   impact-based scope and estimate
+  select --halo [--base N] [--max N]      checks around the code changed since build N, for verifying fixes
   coverage [--json]                       regenerate qa/coverage.md
   run new --mode MODE [--budget P]        create the next run file
   results merge RUN                       merge role notes' results into the run file

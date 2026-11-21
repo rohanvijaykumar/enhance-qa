@@ -59,6 +59,25 @@ Run these quietly; don't install anything without the user's OK.
 - **Linux:** AT-SPI (`dogtail`, `pyatspi`) where available; otherwise `xdotool` plus screenshots.
 - **Computer use** is the last resort: the Claude desktop app on macOS and Windows, or the Codex desktop app. Use it for a few visual or physical-feel checks, never for whole suites.
 
+## Several copies at once (lanes)
+
+Testers work in parallel lanes, each with its own copy of the app (`policies/cost.md`). Some apps won't run two copies, or their copies share one settings folder: a single-instance lock, a fixed port, one profile. Then a second copy only brings the first window forward, or two testers overwrite each other's settings. Don't drop to one lane for that. Give each lane its own identity, without editing the product's files.
+
+1. **Find out during recon:** start the app twice, and look where it keeps settings and data (the platform module says where). Write what's shared, and the lane recipe, under "Parallel lanes" in `qa/notes.md`.
+2. **Give each lane its own identity,** trying these in order:
+   - an option the app already has: a profile, data-folder or port flag, or an environment variable it reads;
+   - the platform's own way: a profile folder per copy for Electron, a lane build with its own app ID for Tauri (`coverage/platforms/electron-tauri.md`, "Parallel lanes");
+   - standard folders per lane: `HOME`, `XDG_CONFIG_HOME` and `XDG_DATA_HOME` on Linux and macOS; `APPDATA` and `LOCALAPPDATA` on Windows, which only some apps read;
+   - for state behind a server: a port, a database copy or a test account per lane.
+3. **Never edit the product's files to make a lane,** even briefly: no config, manifest, package or generated-file changes. Pass overrides on the command line or in files under `qa/.state/lanes/`, and keep lane builds in their own output folder, so the product's own build stays as it was. Run `git status` before and after the first lane build: if the build rewrote a tracked file, put it back (it was clean before) and build the remaining lanes from an exported copy of the snapshot outside the project instead.
+4. **Prove it once before fanning out:** start two lanes, one after the other. Both windows must open, each lane's data folder must fill on its own, and each driver must reach its own copy (ask each copy something that differs, like its app ID). If any of that fails, try the next option in step 2.
+5. **Keep machine-wide things on lane 1.** The clipboard, global shortcuts, window focus, sound, notifications and file associations belong to the whole computer. Checks that use them run on lane 1, with the real app ID and the real build (installed, where the check needs it). So do checks about the identity itself: single instance, deep links, auto-update, install and uninstall, start at login. On the other lanes, turn off features that watch shared things (a clipboard watcher) where a setting allows it.
+6. **Lanes don't share anything else.** Each lane saves its files to its own folder (`qa/evidence/out/<lane>/`), uses its own driver and debug ports, starts only after the previous lane answers, and restarts only its own process: found by its program path, never by name, together with its child processes.
+7. **If something stays shared** (a settings path written into the code), run the checks that change it on lane 1 and the rest in parallel. Say so in the notes.
+8. **Clean up at the end of the run:** stop the lanes, then delete the lane builds, any exported copy, and the data folders the lane identities created (only names this run made, like `<app-id>.qa2`; never the real app's). If the platform blocks a deletion, list the paths in the summary. The notes keep the recipe, so the next run rebuilds lanes in minutes.
+
+**Worth it** whenever a pass would take more than about an hour on one lane. Building lanes takes minutes, the first one longest while dependencies compile; three lanes finish the testing in about a third of the time.
+
 ## Mobile
 
 - **Android:** `adb` with `uiautomator dump`, which gives compact XML for the current screen. Use `adb shell input` for taps and text, `adb logcat` filtered to the app, and Maestro flows (YAML) for repeatable paths. Use the emulator for most checks; real devices are `device` checks.
